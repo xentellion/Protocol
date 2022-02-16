@@ -1,5 +1,4 @@
-from discord.ext import commands, has_permissions, MissingPermissions
-from discord import Member
+from discord.ext import commands
 import json
 import combat_data
 import random
@@ -39,7 +38,7 @@ class Battle(commands.Cog):
         await message.pin()
         new_combat = combat_data.Combat(ctx.message.channel.id, message.id)
         self.save_update(path, new_combat)
-        await ctx.send("""**Справка:** 
+        await ctx.send("""**Справка: `init` или `i`**  
                 !init begin - Начать бой
                 !init end - Закончить бой
                 !init add <mod> <name> - Добавить участника
@@ -93,7 +92,7 @@ class Battle(commands.Cog):
         await ctx.send(f'`{actor.name}` has been added to combat with initiative 1d20 ({rand}) {sign} {mod} = `{sum}`.')
 
     @init_combat.command()
-    @has_permissions(ban_members=True)
+    @commands.has_permissions(administrator=True)
     async def remove(self, ctx, name):
         path = f'{main.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
@@ -111,6 +110,7 @@ class Battle(commands.Cog):
         self.save_update(path, m)
         await self.update_message(ctx, m)
         await ctx.send(f'`{name}` has been removed from combat')
+        
 
     @init_combat.command()
     async def next(self, ctx):
