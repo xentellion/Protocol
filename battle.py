@@ -1,4 +1,5 @@
-from discord.ext import commands
+from discord.ext import commands, has_permissions, MissingPermissions
+from discord import Member
 import json
 import combat_data
 import random
@@ -14,7 +15,12 @@ class Battle(commands.Cog):
     @commands.group(aliases=['init', 'i'])
     async def init_combat(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send("Command can't be invoked without a subcommand")
+            await ctx.send("""**Справка:** 
+                !init begin - Начать бой
+                !init end - Закончить бой
+                !init add <mod> <name> - Добавить участника
+                !init remove <name> - Убрать участника
+                !init next - Передать очередь""")
  
     @init_combat.command()
     async def begin(self, ctx):
@@ -87,10 +93,8 @@ class Battle(commands.Cog):
         await ctx.send(f'`{actor.name}` has been added to combat with initiative 1d20 ({rand}) {sign} {mod} = `{sum}`.')
 
     @init_combat.command()
+    @has_permissions(ban_members=True)
     async def remove(self, ctx, name):
-        print(name)
-        if not ctx.message.author.guild_permissions.administrator:
-                return
         path = f'{main.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
