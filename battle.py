@@ -16,11 +16,11 @@ class Battle(commands.Cog):
         await ctx.message.delete()
         if ctx.invoked_subcommand is None:
             await ctx.send("""**Справка: `init` или `i`** 
-                !init begin - Начать бой
-                !init end - Закончить бой
-                !init add <mod> <name> - Добавить участника
-                !init remove <name> - Убрать участника
-                !init next - Передать очередь""")
+                `!init begin` - Начать бой
+                `!init end` - Закончить бой
+                `!init add <mod> <name>` - Добавить участника
+                `!init remove <name>` - Убрать участника
+                `!init next` - Передать очередь""")
  
     @init_combat.command()
     async def begin(self, ctx):
@@ -40,11 +40,11 @@ class Battle(commands.Cog):
         new_combat = combat_data.Combat(ctx.message.channel.id, message.id)
         self.save_update(path, new_combat)
         await ctx.send("""**Справка: `init` или `i`**  
-                !init begin - Начать бой
-                !init end - Закончить бой
-                !init add <mod> <name> - Добавить участника
-                !init remove <name> - Убрать участника
-                !init next - Передать очередь""")
+                `!init begin` - Начать бой
+                `!init end` - Закончить бой
+                `!init add <mod> <name>` - Добавить участника
+                `!init remove <name>` - Убрать участника
+                `!init next` - Передать очередь""")
 
     @init_combat.command()
     async def end(self, ctx):

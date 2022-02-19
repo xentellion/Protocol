@@ -1,5 +1,4 @@
 import os
-import discord as d
 import discord.errors
 from dotenv import load_dotenv
 from discord.ext import commands
@@ -19,8 +18,8 @@ extensions = [
         
 folder = './Data/'
 server_folder = 'Server/'
-if not os.path.exists(folder):
-    os.makedirs(folder)
+if not os.path.exists(folder + server_folder):
+    os.makedirs(folder + server_folder)
 
 activity = discord.Activity(type=discord.ActivityType.watching, name = "как горят миры")
 status = discord.Status.online
