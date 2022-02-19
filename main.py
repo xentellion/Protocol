@@ -18,6 +18,7 @@ extensions = [
     'characters']
         
 folder = './Data/'
+server_folder = 'Server/'
 if not os.path.exists(folder):
     os.makedirs(folder)
 

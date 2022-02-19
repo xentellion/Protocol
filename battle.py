@@ -13,8 +13,9 @@ class Battle(commands.Cog):
 
     @commands.group(aliases=['init', 'i'])
     async def init_combat(self, ctx):
+        await ctx.message.delete()
         if ctx.invoked_subcommand is None:
-            await ctx.send("""**Справка:** 
+            await ctx.send("""**Справка: `init` или `i`** 
                 !init begin - Начать бой
                 !init end - Закончить бой
                 !init add <mod> <name> - Добавить участника
@@ -83,9 +84,9 @@ class Battle(commands.Cog):
                 args = mod + ' ' + args
                 mod = 0
         sum = eval(str(rand) + sign + str(mod))
-        actor = combat_data.Actor(''.join(args).strip(), ctx.message.author.id, sum) 
-        m.add_actors(actor.__dict__)
-        if sum >= m.get_current()['initiative'] and len(m.actors) > 1:
+        actor = combat_data.Actor(args.strip(), ctx.message.author.id, sum) 
+        m.add_actors(actor)
+        if sum >= m.get_current().initiative and len(m.actors) > 1:
             m.turn += 1
         self.save_update(path, m)
         await self.update_message(ctx, m)
@@ -93,11 +94,12 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     @commands.has_permissions(administrator=True)
-    async def remove(self, ctx, name):
+    async def remove(self, ctx, *args):
         path = f'{main.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
-        if actor['name'] == name:
+        name = ' '.join(args).strip()
+        if actor.name == name:
             await ctx.send(f'You can\'t remove characters on their turn!')
             return
         try:
@@ -109,31 +111,30 @@ class Battle(commands.Cog):
             return
         self.save_update(path, m)
         await self.update_message(ctx, m)
-        await ctx.send(f'`{name}` has been removed from combat')
-        
+        await ctx.send(f'`{name}` has been removed from combat')      
 
     @init_combat.command()
     async def next(self, ctx):
         path = f'{main.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
-        if ctx.message.author.id == actor['author'] or ctx.message.author.guild_permissions.administrator:
+        if ctx.message.author.id == actor.author or ctx.message.author.guild_permissions.administrator:
             m.next_turn()
             actor = m.get_current()
             self.save_update(path, m)
             await self.update_message(ctx, m)
-            await ctx.send(f"**Initiative {actor['initiative']} (round {m.round}):** {actor['name']} (<@{actor['author']}>)```\n{actor['name']}```")
+            await ctx.send(f"**Initiative {actor.initiative} (round {m.round}):** {actor.name} (<@{actor.author}>)```\n{actor.name}```")
         else:
             await ctx.send('It is not your turn!')
 
     async def update_message(self, ctx, combat: combat_data.Combat):
         msg = await ctx.fetch_message(combat.message)
-        text = f"```md\nCurrent initiative: {combat.actors[combat.turn].get('initiative')} (round {combat.round})\n"
+        text = f"```md\nCurrent initiative: {combat.actors[combat.turn].initiative} (round {combat.round})\n"
         text += '=' * (len(text) - 7) + '\n'
         for i in range(len(combat.actors)):
             text += '# ' if i == combat.turn and combat.round > 0 else '  '
             actor = combat.actors[i]
-            text += f"{actor.get('initiative')}: {actor.get('name')}\n"
+            text += f"{actor.initiative}: {actor.name}\n"
         text += '```'
         await msg.edit(content= text)
 
@@ -141,15 +142,16 @@ class Battle(commands.Cog):
         with open(path, 'w') as file:
             file.write(data.toJSON())
 
-    async def get_file_data(self, ctx, path):
+    async def get_file_data(self, ctx, path) -> combat_data.Combat:
         try:
-            f = open(path)
-            data = json.load(f)
-            f.close()
+            with open(path, 'r') as file:
+                data = file.read().replace('\n', '')
         except FileNotFoundError:
             await ctx.send('There is no combat in this channel!')
             return
-        return combat_data.Combat(data)
+        c = combat_data.Combat(**json.loads(data))
+        c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
+        return c
 
 def setup(bot):
     bot.add_cog(Battle(bot))
