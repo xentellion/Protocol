@@ -14,7 +14,8 @@ intents.members = True
 extensions = [
     'roll_dice',
     'battle',
-    'characters']
+    'characters',
+    'misc']
         
 folder = './Data/'
 server_folder = 'Server/'

@@ -79,6 +79,8 @@ class Chars(commands.Cog):
         else:
             await ctx.send(f'Campaign `{name.strip()}` is not found!')
 
+    # ================================================================================================ #
+
     @commands.group(aliases=['char', 'c'])
     async def chars(self, ctx):
         await ctx.message.delete()
@@ -93,7 +95,7 @@ class Chars(commands.Cog):
                 """)
 
     # @chars.command()
-    # async def add(self, ctx, name):
+    # async def create(self, ctx, name):
     #     path = f'{main.folder}{main.server_folder}{ctx.message.guild.id}.json'
     #     serv = await self.get_file(ctx, path)
     #     # check if there is second

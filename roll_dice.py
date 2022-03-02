@@ -1,5 +1,6 @@
 import random
 from discord.ext import commands
+from discord import errors
 import re
 
 class RollDice(commands.Cog):
@@ -8,7 +9,11 @@ class RollDice(commands.Cog):
 
     @commands.command(name='roll')
     async def roll_send(self, ctx):
-        await ctx.message.delete()
+        try:
+            await ctx.message.delete()
+        except errors.NotFound:
+            print('Message has been deleted\n')
+            return
         start = ctx.message.content[5:].strip()
         start = ' '.join(start.split())
 
