@@ -15,7 +15,9 @@ extensions = [
     'roll_dice',
     'battle',
     'characters',
-    'misc']
+    'misc',
+    'music']
+
         
 folder = './Data/'
 server_folder = 'Server/'

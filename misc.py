@@ -12,7 +12,7 @@ class Misc(commands.Cog):
         await webhook.send(content=arg, username='Protocol', avatar_url=self.bot.user.avatar_url)
         await webhook.delete()
 
-    @commands.command(name='techo')
+    @commands.command(name='techo', help='Temporary message for up to 600 sceonds')
     async def techo(self, ctx, _time, *, arg):
         try:
             _time = int(_time)
