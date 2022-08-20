@@ -1,5 +1,6 @@
 from discord.ext import commands
 import asyncio
+import discord
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -26,6 +27,15 @@ class Misc(commands.Cog):
         mes = await ctx.send(arg)
         await asyncio.sleep(_time)
         await mes.delete()
+
+    @commands.command()
+    async def protocol(self, ctx):
+        embed = discord.Embed(
+            title='**ПРОТОКОЛ ИНИЦИИРОВАН**',
+            color=discord.Color.gold()
+        )
+        embed.set_image(url='https://cdn.discordapp.com/attachments/891746827798454343/945271937339371530/dfe33c069124f36c.png')
+        await ctx.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Misc(bot))
