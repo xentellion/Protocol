@@ -149,5 +149,5 @@ class Music(commands.Cog):
             self.music_queue = []
             await voice_state.disconnect()
 
-def setup(bot):
-    bot.add_cog(Music(bot))
+async def setup(bot):
+    await bot.add_cog(Music(bot))

@@ -37,5 +37,5 @@ class Misc(commands.Cog):
         embed.set_image(url='https://cdn.discordapp.com/attachments/891746827798454343/945271937339371530/dfe33c069124f36c.png')
         await ctx.send(embed=embed)
 
-def setup(bot):
-    bot.add_cog(Misc(bot))
+async def setup(bot):
+    await bot.add_cog(Misc(bot))

@@ -2,7 +2,7 @@ from discord.ext import commands
 import character_data
 import discord
 import asyncio
-import main
+import __main__
 import json
 
 class Chars(commands.Cog):
@@ -21,7 +21,7 @@ class Chars(commands.Cog):
     @campaign.command()
     @commands.has_permissions(administrator=True)
     async def create(self, ctx, *args):
-        path = f'{main.folder}{main.server_folder}{ctx.message.guild.id}.json'
+        path = f'{__main__.folder}{__main__.server_folder}{ctx.message.guild.id}.json'
         camp = await self.get_file(ctx, path)
         name = ' '.join(args)
         if camp.find_campain(name):
@@ -34,7 +34,7 @@ class Chars(commands.Cog):
     @campaign.command()
     @commands.has_permissions(administrator=True)
     async def delete(self, ctx, *args):
-        path = f'{main.folder}{main.server_folder}{ctx.message.guild.id}.json'
+        path = f'{__main__.folder}{__main__.server_folder}{ctx.message.guild.id}.json'
         camp = await self.get_file(ctx, path)
         name = ' '.join(args)
         
@@ -45,7 +45,7 @@ class Chars(commands.Cog):
             return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() in answers
         
         try:
-            request_msg = await main.bot.wait_for(event='message', check= check, timeout= 15.0)
+            request_msg = await __main__.bot.wait_for(event='message', check= check, timeout= 15.0)
         except asyncio.TimeoutError:
             await ctx.send('**Time for an answer has ended or the answer is wrong**')
         else:
@@ -59,7 +59,7 @@ class Chars(commands.Cog):
     @campaign.command()
     @commands.has_permissions(administrator=True)
     async def list(self, ctx):
-        path = f'{main.folder}{main.server_folder}{ctx.message.guild.id}.json'
+        path = f'{__main__.folder}{__main__.server_folder}{ctx.message.guild.id}.json'
         camp = await self.get_file(ctx, path)
         text = ''
         for i in camp.campaigns:
@@ -69,7 +69,7 @@ class Chars(commands.Cog):
     @campaign.command()
     @commands.has_permissions(administrator=True)
     async def set(self, ctx, *args):
-        path = f'{main.folder}{main.server_folder}{ctx.message.guild.id}.json'
+        path = f'{__main__.folder}{__main__.server_folder}{ctx.message.guild.id}.json'
         camp = await self.get_file(ctx, path)
         name = ' '.join(args)
         if camp.find_campain(name):
@@ -125,5 +125,5 @@ class Chars(commands.Cog):
         with open(path, 'w') as file:
             file.write(data.toJSON())    
 
-def setup(bot):
-    bot.add_cog(Chars(bot))
+async def setup(bot):
+    await bot.add_cog(Chars(bot))

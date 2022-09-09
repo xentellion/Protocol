@@ -2,7 +2,7 @@ from discord.ext import commands
 import json
 import combat_data
 import random
-import main
+import __main__
 import os
 import asyncio
 import discord
@@ -24,7 +24,7 @@ class Battle(commands.Cog):
  
     @init_combat.command()
     async def begin(self, ctx):
-        path = f'{main.folder}{ctx.message.channel.id}.json'
+        path = f'{__main__.folder}{ctx.message.channel.id}.json'
         try:
             f = open(path)
             await ctx.send('There is already a combat in this channel!')
@@ -48,30 +48,34 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     async def end(self, ctx):
-        path = f'{main.folder}{ctx.message.channel.id}.json'
+        path = f'{__main__.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
-        await ctx.send('**Are you sure you want to stop the combat? Type yes/no**')
-        answers = { 'yes', 'no'}
 
-        def check(m: discord.Message):
-            return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() in answers
-        
-        try:
-            request_msg = await main.bot.wait_for(event='message', check= check, timeout= 15.0)
-        except asyncio.TimeoutError:
-            await ctx.send('**Time for an answer has ended or the answer is wrong**')
-        else:
-            if request_msg.content.lower() == 'yes':
-                msg = await ctx.fetch_message(m.message)
-                await msg.delete()
-                os.remove(path)
-                await ctx.send('**End of combat**')
-            else:
-                await ctx.send('**Cancelled**')
+
+        msg = await ctx.fetch_message(m.message)
+        await msg.unpin()
+        os.remove(path)
+        await ctx.send('**End of combat**')
+        # await ctx.send('**Are you sure you want to stop the combat? Type yes/no**')
+        # answers = { 'yes', 'no'}
+        # def check(m: discord.Message):
+        #     return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() in answers
+        # try:
+        #     request_msg = await __main__.bot.wait_for(event='message', check= check, timeout= 15.0)
+        # except asyncio.TimeoutError:
+        #     await ctx.send('**Time for an answer has ended or the answer is wrong**')
+        # else:
+        #     if request_msg.content.lower() == 'yes':
+        #         msg = await ctx.fetch_message(m.message)
+        #         await msg.delete()
+        #         os.remove(path)
+        #         await ctx.send('**End of combat**')
+        #     else:
+        #         await ctx.send('**Cancelled**')
 
     @init_combat.command()
     async def add(self, ctx, mod, *args):
-        path = f'{main.folder}{ctx.message.channel.id}.json'
+        path = f'{__main__.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         rand = random.randint(1, 20)
         sign = '+'
@@ -95,7 +99,7 @@ class Battle(commands.Cog):
     @init_combat.command()
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx, *args):
-        path = f'{main.folder}{ctx.message.channel.id}.json'
+        path = f'{__main__.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
         name = ' '.join(args).strip()
@@ -115,7 +119,7 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     async def next(self, ctx):
-        path = f'{main.folder}{ctx.message.channel.id}.json'
+        path = f'{__main__.folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
         if ctx.message.author.id == actor.author or ctx.message.author.guild_permissions.administrator:
@@ -153,5 +157,5 @@ class Battle(commands.Cog):
         c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
         return c
 
-def setup(bot):
-    bot.add_cog(Battle(bot))
+async def setup(bot):
+    await bot.add_cog(Battle(bot))
