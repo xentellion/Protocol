@@ -15,6 +15,8 @@ intents.members = True
 folder = './Data/'
 server_folder = 'Server/'
 config_path = folder + 'config.yml'
+os.makedirs(folder, exist_ok= True)
+os.makedirs(folder + server_folder, exist_ok= True)
 with open(config_path, 'a+', encoding="utf8") as file:
     file.seek(0)
     config = yaml.safe_load(file)
