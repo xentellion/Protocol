@@ -74,6 +74,32 @@ class Form(discord.ui.Modal):
         self.bot.characters = pd.read_csv(path, index_col= 0)
         await interaction.response.send_message(embed= embed)
 
+class Message(discord.ui.Modal):  
+    login = discord.ui.TextInput(
+        style= discord.TextStyle.long,
+        label = "Введите сообщение",
+        placeholder= "Ваше сообщение",
+        required= True,
+        max_length=2000
+    )
+
+    def __init__(self, bot:Protocol, char):      
+        self.bot = bot
+        super().__init__(title="Напишите сообщение")
+        self.character = char
+
+    async def on_submit(self, interaction: discord.Interaction, ):
+        df = self.bot.characters
+        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == self.character)]
+        webhook = await interaction.channel.create_webhook(name='Protocol')
+        await webhook.send(
+            content= self.login.value, 
+            username= f"{df.at[char.index[0], 'login']}", 
+            avatar_url= f"{df.at[char.index[0], 'avatar']}",
+            wait= True)
+        await webhook.delete()
+        await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
+
 
 class Slash(commands.Cog):
     def __init__(self, bot: Protocol):
@@ -102,17 +128,9 @@ class Slash(commands.Cog):
 
     @app_commands.command(name="twit", description= "Write as your character!")
     @app_commands.autocomplete(character=rps_autocomplete)
-    async def twitter_post(self, interaction: discord.Interaction, character:str, *, text:str):
-        df = self.bot.characters
-        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == character)]
-        webhook = await interaction.channel.create_webhook(name='Protocol')
-        await webhook.send(
-            content= text, 
-            username= f"{df.at[char.index[0], 'login']}", 
-            avatar_url= f"{df.at[char.index[0], 'avatar']}",
-            wait= True)
-        await webhook.delete()
-        await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
+    async def twitter_post(self, interaction: discord.Interaction, character:str):
+        await interaction.response.send_modal(Message(self.bot, character))
+        
 
     @app_commands.command(name="delete_twitter", description= "Delete your character")
     @app_commands.autocomplete(character=rps_autocomplete)
