@@ -1,4 +1,3 @@
-from turtle import pd
 from discord.ext import commands
 from enums import Enums
 import pandas as pd
