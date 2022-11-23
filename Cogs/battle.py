@@ -2,7 +2,6 @@ from discord.ext import commands
 import json
 import combat_data
 import random
-import __main__
 import os
 import asyncio
 import discord
@@ -24,7 +23,7 @@ class Battle(commands.Cog):
  
     @init_combat.command()
     async def begin(self, ctx):
-        path = f'{__main__.folder}{ctx.message.channel.id}.json'
+        path = f'{self.bot.data_folder}{ctx.message.channel.id}.json'
         try:
             f = open(path)
             await ctx.send('There is already a combat in this channel!')
@@ -48,7 +47,7 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     async def end(self, ctx):
-        path = f'{__main__.folder}{ctx.message.channel.id}.json'
+        path = f'{self.bot.data_folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
 
 
@@ -75,7 +74,7 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     async def add(self, ctx, mod, *args):
-        path = f'{__main__.folder}{ctx.message.channel.id}.json'
+        path = f'{self.bot.data_folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         rand = random.randint(1, 20)
         sign = '+'
@@ -99,7 +98,7 @@ class Battle(commands.Cog):
     @init_combat.command()
     @commands.has_permissions(administrator=True)
     async def remove(self, ctx, *args):
-        path = f'{__main__.folder}{ctx.message.channel.id}.json'
+        path = f'{self.bot.data_folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
         name = ' '.join(args).strip()
@@ -119,7 +118,7 @@ class Battle(commands.Cog):
 
     @init_combat.command()
     async def next(self, ctx):
-        path = f'{__main__.folder}{ctx.message.channel.id}.json'
+        path = f'{self.bot.data_folder}{ctx.message.channel.id}.json'
         m = await self.get_file_data(ctx, path)
         actor = m.get_current()
         if ctx.message.author.id == actor.author or ctx.message.author.guild_permissions.administrator:

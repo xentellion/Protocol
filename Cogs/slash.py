@@ -1,6 +1,3 @@
-from code import interact
-from email import message
-from secrets import choice
 import discord
 import pandas as pd
 from enums import Enums
@@ -10,10 +7,10 @@ from discord import app_commands
 from discord.ext import commands
 
 class DeleteConfirm(discord.ui.View):
-    def __init__(self, bot:Protocol, lang: dict, char) -> None:
+    def __init__(self, bot:Protocol, character) -> None:
         super().__init__(timeout= 10)
         self.bot = bot
-        self.char = char
+        self.char = character
         self.titles = ["ДА", "НЕТ"]
         self.add_buttons()
 
@@ -46,8 +43,8 @@ class DeleteConfirm(discord.ui.View):
 
 class Form(discord.ui.Modal):  
     login = discord.ui.TextInput(
-        label= 'temp',
         style= discord.TextStyle.short,
+        label = "Задайте имя персонажа",
         placeholder= "SampleLogin",
         required= True,
         min_length= 3,
@@ -55,23 +52,22 @@ class Form(discord.ui.Modal):
     )
 
     avatar = discord.ui.TextInput(
-        label= 'temp',
         style=discord.TextStyle.short,
-        required= False
+        required= False,
+        label = "Вставьте ссылку на аватарку вашего персонажа",
+        placeholder= "Link MUST have file format: .jpeg, .png, etc.",
     )
 
     def __init__(self, bot:Protocol):      
         self.bot = bot
         super().__init__(title="Зарегистрировать персонажа")
-        self.login.label = "Задайте имя персонажа"
-        self.avatar.label = "Вставьте ссылку на аватарку вашего персонажа"
-        self.avatar.placeholder = "Вставьте ссылку сюда"
 
     async def on_submit(self, interaction: discord.Interaction):
         embed = discord.Embed(title = f'**{self.login}** присоединился к сети!')
         embed.set_author(name = interaction.user, icon_url=interaction.user.avatar.url)
         avatar = self.avatar if self.avatar.value != '' else Enums.default_image
         embed.set_thumbnail(url= avatar)
+
         self.bot.characters.loc[len(self.bot.characters.index)] = [interaction.user.id, self.login, avatar]
         path = self.bot.data_folder + Enums.default_char_list
         self.bot.characters.to_csv(path)
@@ -104,7 +100,6 @@ class Slash(commands.Cog):
             for choice in choices if current.lower() in choice.name.lower()
         ]
 
-
     @app_commands.command(name="twit", description= "Write as your character!")
     @app_commands.autocomplete(character=rps_autocomplete)
     async def twitter_post(self, interaction: discord.Interaction, character:str, *, text:str):
@@ -120,15 +115,27 @@ class Slash(commands.Cog):
         await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
 
     @app_commands.command(name="delete_twitter", description= "Delete your character")
-    @app_commands.autocomplete(choices=rps_autocomplete)
-    async def twitter_delete(self, interaction: discord.Interaction, choices:str):
+    @app_commands.autocomplete(character=rps_autocomplete)
+    async def twitter_delete(self, interaction: discord.Interaction, character:str):
         df = self.bot.characters
-        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == choices)]
+        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == character)]
         await interaction.response.send_message(
             "Вы уверены, что хотите удалить персонажа?", 
             view= DeleteConfirm(self.bot, char), 
             ephemeral= True
         )
+
+    @app_commands.command(name="change_avatar", description= "Change character avatar")
+    @app_commands.autocomplete(character=rps_autocomplete)
+    async def change_avatar(self, interaction: discord.Interaction, character:str, *, avatar:str):
+        df = self.bot.characters
+        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == character)]
+        df.at[char.index[0], 'avatar'] = avatar
+        path = self.bot.data_folder + Enums.default_char_list
+        self.bot.characters = df
+        self.bot.characters.to_csv(path)
+        self.bot.characters = pd.read_csv(path, index_col= 0)
+        await interaction.response.send_message("Аватар изменен ✅", ephemeral=True)
 
 async def setup(bot: Protocol):
     await bot.add_cog(Slash(bot))
