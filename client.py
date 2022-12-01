@@ -23,6 +23,8 @@ class Protocol(commands.Bot):
                 raise EmptyConfig(self.config_path)
             elif self.config['BOT_PREFIX'] == "":
                 raise EmptyConfig(self.config_path)
+        with open('./help.yml', 'r', encoding="utf8") as file:
+            self.help = list(yaml.safe_load(file))
         super().__init__(
             command_prefix= self.config['BOT_PREFIX'], 
             intents= intents, 

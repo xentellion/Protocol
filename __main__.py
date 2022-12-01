@@ -7,7 +7,7 @@ from client import Protocol
 intents = discord.Intents.all()
 intents.members = True
 activity = discord.Activity(
-    type=discord.ActivityType.listening, 
+    type=discord.ActivityType.watching, 
     name = "как горят миры"
 )
 
@@ -17,6 +17,8 @@ protocol = Protocol(
     data_folder= './Data/',
     config= 'config.yml'
 )
+
+protocol.remove_command('help')
 
 @protocol.event
 async def on_thread_update(thread):
