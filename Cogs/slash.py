@@ -1,10 +1,9 @@
-import aiohttp
 import discord
 import pandas as pd
 from enums import Enums
 from typing import List
 from client import Protocol
-from discord import app_commands, Webhook
+from discord import app_commands
 from discord.ext import commands
 
 
@@ -42,7 +41,7 @@ class Form(discord.ui.Modal):
         await interaction.response.send_message(embed= embed)
 
 
-class Message(discord.ui.Modal):  
+class Message(discord.ui.Modal): 
     login = discord.ui.TextInput(
         style= discord.TextStyle.long,
         label = "Введите сообщение",
@@ -76,14 +75,44 @@ class Message(discord.ui.Modal):
                 avatar_url= f"{df.at[char.index[0], 'avatar']}",
                 thread= interaction.channel,
                 wait= True)
-        
-        # Это на создание треда от лица персонажа
-        # await webhook.send(
-        #     content= self.login.value, 
-        #     username= f"{df.at[char.index[0], 'login']}", 
-        #     avatar_url= f"{df.at[char.index[0], 'avatar']}",
-        #     thread_name= "ТАК ПАДАЖЖИ БЛЯ",
-        #     wait= True)  
+         
+        await webhook.delete()
+        await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
+
+
+class TopicStarter(discord.ui.Modal):
+    topic_title = discord.ui.TextInput(
+        style= discord.TextStyle.short,
+        label = "Введите заголовок ветки",
+        placeholder= "Заголовок",
+        required= True,
+        max_length=500
+    )
+
+    topic_text = discord.ui.TextInput(
+        style= discord.TextStyle.long,
+        label = "Введите сообщение",
+        placeholder= "Ваше сообщение",
+        required= True,
+        max_length=2000
+    )
+
+    def __init__(self, bot:Protocol, char):      
+        self.bot = bot
+        super().__init__(title="Начните обсуждение в форуме")
+        self.character = char
+
+    async def on_submit(self, interaction: discord.Interaction, ):
+        df = self.bot.characters
+        char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == self.character)]
+        webhook = await interaction.channel.parent.create_webhook(name='Protocol2')
+
+        await webhook.send(
+            thread_name= self.topic_title.value,
+            content= self.topic_text.value, 
+            username= f"{df.at[char.index[0], 'login']}", 
+            avatar_url= f"{df.at[char.index[0], 'avatar']}",
+            wait= True)
          
         await webhook.delete()
         await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
@@ -153,6 +182,11 @@ class Slash(commands.Cog):
     @app_commands.autocomplete(character=rps_autocomplete)
     async def twitter_post(self, interaction: discord.Interaction, character:str):
         await interaction.response.send_modal(Message(self.bot, character))
+
+    @app_commands.command(name="start_topic", description= "Start your character topic in forum!")
+    @app_commands.autocomplete(character=rps_autocomplete)
+    async def twitter_ts(self, interaction: discord.Interaction, character:str):
+        await interaction.response.send_modal(TopicStarter(self.bot, character))
         
 
     @app_commands.command(name="delete_twitter", description= "Delete your character")
