@@ -1,44 +1,11 @@
+import aiohttp
 import discord
 import pandas as pd
 from enums import Enums
 from typing import List
 from client import Protocol
-from discord import app_commands
+from discord import app_commands, Webhook
 from discord.ext import commands
-
-class DeleteConfirm(discord.ui.View):
-    def __init__(self, bot:Protocol, character) -> None:
-        super().__init__(timeout= 10)
-        self.bot = bot
-        self.char = character
-        self.titles = ["ДА", "НЕТ"]
-        self.add_buttons()
-
-    async def page_yes(self, interaction: discord.Interaction):
-        self.bot.characters = self.bot.characters.drop(self.char.index[0])
-        path = self.bot.data_folder + 'characters.csv'
-        self.bot.characters.to_csv(path)
-        self.bot.characters = pd.read_csv(path, index_col= 0)
-        await interaction.response.send_message("Персонаж удален", ephemeral=True)
-
-    async def page_no(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Отмена удаления", ephemeral=True)
-        await interaction.delete_original_response()
-        self.clear_items()
-
-    def add_buttons(self):     
-        colors = [
-            discord.ButtonStyle.red, 
-            discord.ButtonStyle.green 
-        ]
-        methods = [
-            self.page_yes, 
-            self.page_no 
-        ]
-        for i in range(len(methods)):
-            button = discord.ui.Button(label= self.titles[i], style= colors[i])
-            button.callback = methods[i]
-            self.add_item(button)
 
 
 class Form(discord.ui.Modal):  
@@ -74,6 +41,7 @@ class Form(discord.ui.Modal):
         self.bot.characters = pd.read_csv(path, index_col= 0)
         await interaction.response.send_message(embed= embed)
 
+
 class Message(discord.ui.Modal):  
     login = discord.ui.TextInput(
         style= discord.TextStyle.long,
@@ -91,14 +59,69 @@ class Message(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction, ):
         df = self.bot.characters
         char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == self.character)]
-        webhook = await interaction.channel.create_webhook(name='Protocol')
-        await webhook.send(
-            content= self.login.value, 
-            username= f"{df.at[char.index[0], 'login']}", 
-            avatar_url= f"{df.at[char.index[0], 'avatar']}",
-            wait= True)
+        webhook = None
+
+        try:
+            webhook = await interaction.channel.create_webhook(name='Protocol1')
+            await webhook.send(
+                content= self.login.value, 
+                username= f"{df.at[char.index[0], 'login']}", 
+                avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                wait= True)
+        except:
+            webhook = await interaction.channel.parent.create_webhook(name='Protocol2')
+            await webhook.send(
+                content= self.login.value, 
+                username= f"{df.at[char.index[0], 'login']}", 
+                avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                thread= interaction.channel,
+                wait= True)
+        
+        # Это на создание треда от лица персонажа
+        # await webhook.send(
+        #     content= self.login.value, 
+        #     username= f"{df.at[char.index[0], 'login']}", 
+        #     avatar_url= f"{df.at[char.index[0], 'avatar']}",
+        #     thread_name= "ТАК ПАДАЖЖИ БЛЯ",
+        #     wait= True)  
+         
         await webhook.delete()
         await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
+
+
+class DeleteConfirm(discord.ui.View):
+    def __init__(self, bot:Protocol, character) -> None:
+        super().__init__(timeout= 10)
+        self.bot = bot
+        self.char = character
+        self.titles = ["ДА", "НЕТ"]
+        self.add_buttons()
+
+    async def page_yes(self, interaction: discord.Interaction):
+        self.bot.characters = self.bot.characters.drop(self.char.index[0])
+        path = self.bot.data_folder + 'characters.csv'
+        self.bot.characters.to_csv(path)
+        self.bot.characters = pd.read_csv(path, index_col= 0)
+        await interaction.response.send_message("Персонаж удален", ephemeral=True)
+
+    async def page_no(self, interaction: discord.Interaction):
+        await interaction.response.send_message("Отмена удаления", ephemeral=True)
+        await interaction.delete_original_response()
+        self.clear_items()
+
+    def add_buttons(self):     
+        colors = [
+            discord.ButtonStyle.red, 
+            discord.ButtonStyle.green 
+        ]
+        methods = [
+            self.page_yes, 
+            self.page_no 
+        ]
+        for i in range(len(methods)):
+            button = discord.ui.Button(label= self.titles[i], style= colors[i])
+            button.callback = methods[i]
+            self.add_item(button)
 
 
 class Slash(commands.Cog):
