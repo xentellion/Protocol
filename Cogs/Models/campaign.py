@@ -1,6 +1,7 @@
 import os
 import json
 import discord
+from data_control import *
 from client import Protocol
 import character_data
 
@@ -10,14 +11,14 @@ class DeleteConfirm(discord.ui.View):
         super().__init__(timeout= 15)
         self.bot = bot
         self.campaign = campaign
-        self.titles = ["ДА", "НЕТ"]
+        self.titles = ["YES", "NO"]
         self.add_buttons()
 
     async def page_yes(self, interaction: discord.Interaction):
         path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
-        camp = await self.get_file(path)
+        camp = await JsonDataControl.get_file(path)
         camp.remove_campain(self.campaign)
-        self.save_update(path, camp)
+        JsonDataControl.save_update(path, camp)
         await interaction.response.edit_message(
             content="## Campaign Deleted", view= None)
         
@@ -38,24 +39,3 @@ class DeleteConfirm(discord.ui.View):
             button = discord.ui.Button(label= self.titles[i], style= colors[i])
             button.callback = methods[i]
             self.add_item(button)
-
-    async def get_file(self, path) -> character_data.DnDServer:
-        try:
-            with open(path, 'r') as file:
-                data = file.read().replace('\n', '')
-        except FileNotFoundError:
-            print('New DnD server!')
-            self.save_update(path, character_data.DnDServer())
-            with open(path, 'r') as file:
-                data = file.read().replace('\n', '')
-            
-        current_c = character_data.DnDServer(**json.loads(data))
-        current_c.campaigns = [character_data.Campaign.fromdict(x) for x in current_c.campaigns]
-        for camp in current_c.campaigns:
-            camp.characters = [character_data.Character.fromdict(x) for x in camp.characters]
-        return current_c
-
-    def save_update(self, path, data):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'w') as file:
-            file.write(data.toJSON())

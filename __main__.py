@@ -3,6 +3,7 @@ import asyncio
 import discord
 from client import Protocol
 
+discord.utils.setup_logging()
 
 intents = discord.Intents.all()
 intents.members = True

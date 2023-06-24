@@ -50,12 +50,19 @@ class Campaign:
         self.name = name
         self.characters = characters
 
-    def add_character(self, char:Character):
+    def add_character(self, char: Character):
         self.characters.append(char)
         self.characters = sorted(self.characters, key=lambda x: x.name)
 
-    def remove_character(self, char:Character):
-        self.characters.remove(next((x for x in self.characters if x['name'] == char.name), None))
+    def remove_character(self, char: str):
+        self.characters.remove(next((x for x in self.characters if x.name == char), None))
+    
+    def check_character(self, char: str):
+        return any((x for x in self.characters if x.name == char))
+
+    def get_character(self, char: str):
+        return next((x for x in self.characters if x.name == char), None)
+        
 
 
 class DnDServer:
@@ -74,6 +81,9 @@ class DnDServer:
 
     def get_campain(self, name) -> Campaign:
         return next(x for x in self.campaigns if x.name == name)
+    
+    def update_campaign(self, camp: Campaign):
+        self.campaigns = [camp if x.name == camp.name else x for x in self.campaigns]
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

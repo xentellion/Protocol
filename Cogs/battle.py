@@ -3,8 +3,7 @@ import json
 import combat_data
 import random
 import os
-import asyncio
-import discord
+from data_control import *
 
 class Battle(commands.Cog):
     def __init__(self, bot):
@@ -37,7 +36,7 @@ class Battle(commands.Cog):
         message = await ctx.send(text)
         await message.pin()
         new_combat = combat_data.Combat(ctx.message.channel.id, message.id)
-        self.save_update(path, new_combat)
+        JsonDataControl.save_update(path, new_combat)
         await ctx.send("""**Справка: `init` или `i`**  
                 `!init begin` - Начать бой
                 `!init end` - Закончить бой
@@ -55,22 +54,6 @@ class Battle(commands.Cog):
         await msg.unpin()
         os.remove(path)
         await ctx.send('**End of combat**')
-        # await ctx.send('**Are you sure you want to stop the combat? Type yes/no**')
-        # answers = { 'yes', 'no'}
-        # def check(m: discord.Message):
-        #     return m.author.id == ctx.author.id and m.channel.id == ctx.channel.id and m.content.lower() in answers
-        # try:
-        #     request_msg = await __main__.bot.wait_for(event='message', check= check, timeout= 15.0)
-        # except asyncio.TimeoutError:
-        #     await ctx.send('**Time for an answer has ended or the answer is wrong**')
-        # else:
-        #     if request_msg.content.lower() == 'yes':
-        #         msg = await ctx.fetch_message(m.message)
-        #         await msg.delete()
-        #         os.remove(path)
-        #         await ctx.send('**End of combat**')
-        #     else:
-        #         await ctx.send('**Cancelled**')
 
     @init_combat.command()
     async def add(self, ctx, mod, *args):
@@ -91,7 +74,7 @@ class Battle(commands.Cog):
         m.add_actors(actor)
         if sum >= m.get_current().initiative and len(m.actors) > 1:
             m.turn += 1
-        self.save_update(path, m)
+        JsonDataControl.save_update(path, m)
         await self.update_message(ctx, m)
         await ctx.send(f'`{actor.name}` has been added to combat with initiative 1d20 ({rand}) {sign} {mod} = `{sum}`.')
 
@@ -112,7 +95,7 @@ class Battle(commands.Cog):
         except ValueError:
             await ctx.send(f'`{name}` has not been found')
             return
-        self.save_update(path, m)
+        JsonDataControl.save_update(path, m)
         await self.update_message(ctx, m)
         await ctx.send(f'`{name}` has been removed from combat')      
 
@@ -124,7 +107,7 @@ class Battle(commands.Cog):
         if ctx.message.author.id == actor.author or ctx.message.author.guild_permissions.administrator:
             m.next_turn()
             actor = m.get_current()
-            self.save_update(path, m)
+            JsonDataControl.save_update(path, m)
             await self.update_message(ctx, m)
             await ctx.send(f"**Initiative {actor.initiative} (round {m.round}):** {actor.name} (<@{actor.author}>)```\n{actor.name}```")
         else:
@@ -140,10 +123,6 @@ class Battle(commands.Cog):
             text += f"{actor.initiative}: {actor.name}\n"
         text += '```'
         await msg.edit(content= text)
-
-    def save_update(self, path, data):
-        with open(path, 'w') as file:
-            file.write(data.toJSON())
 
     async def get_file_data(self, ctx, path) -> combat_data.Combat:
         try:
