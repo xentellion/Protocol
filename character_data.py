@@ -2,12 +2,6 @@ import math
 import json
 import enum
 
-class Conditions(enum.Enum):
-        Alive = 0
-        Middle_Wound = 1
-        Heavy_Wound = 2
-        Coma = 3
-        Dead = 4
 
 class Character: 
     @classmethod
@@ -15,99 +9,35 @@ class Character:
         df = {k : v for k, v in d.items()}
         return cls(**df)
 
-    def __init__(self, name:str, author:int, 
-                hp: int = 6, max_hp:int = 6,
+    def __init__(self, name:str, author:int,
+                hp: int = 10, max_hp:int = 10,
                 energy: int = 2, max_energy:int = 2,
-                money:int = 0,
-                inventory:str = '', notes:str = '',
-                another:bool = False, status = Conditions.Alive):
+                reaction: int = 0, max_reaction: int = 0, 
+                style: int = 0, max_style: int = 0):
         self.name = name
         self.author = author
         self.hp = hp
         self.max_hp = max_hp
         self.energy = energy
         self.max_energy = max_energy
-        self.money = money
-        self.inventory = inventory
-        self.notes = notes
-        self.another = another
-        self.status = status
+        self.reaction = reaction
+        self.max_reaction = max_reaction
+        self.style = style
+        self.max_style = max_style
 
-    def damage_hp(self, change: int):
-        self.hp -= change
-        self.status_change()
+    def increase_value(self, value, change: int):
+        value += change
 
-    def heal_hp(self, change: int):
-        self.hp += change
-        self.status_change()
-    
-    def resurrect(self):
-        self.hp = math.ceil(self.max_hp / 2)
-        self.status = Character.Conditions.Middle_Wound
-
-    def set_hp(self, hp:int):
-        self.max_hp = hp
-        self.hp = hp
-
-    def give_energy(self, energy: int):
-        self.energy += energy
-        if self.energy > self.max_energy:
-            self.energy = self.max_energy
-
-    def spend_energy(self, energy: int):
-        self.energy -= energy
-        if self.energy < 0:
-            self.energy += energy
-
-    def set_energy(self, energy:int):
-        self.max_energy = energy
-        self.energy = energy
-
-    def change_money(self, money:int):
-        self.money += money
-        if self.money < 0:
-            self.money -= money
+    def reduce_value(self, value, change: int):
+        value -= change
 
     def small_rest(self):
         self.heal_hp(math.ceil(self.max_hp / 4))
         self.give_energy(math.ceil(self.max_hp / 2))
-        self.status_change()
     
     def big_rest(self):
         self.heal_hp(math.ceil(self.max_hp / 2))
         self.give_energy(self.max_hp)
-        self.status_change()
-
-    def update_inventory(self, text):
-        self.inventory = text
-
-    def update_notes(self, text):
-        self.notes = text
-
-    def status_change(self):
-        try:
-            hp_prop = self.max_hp / self.hp
-        except ZeroDivisionError:
-            hp_prop = self.max_hp + 1
-            
-        if self.hp > self.max_hp:
-            self.hp = self.max_hp
-        elif self.hp <= 0:
-            if self.another:
-                self.status = Character.Conditions.Dead
-            elif hp_prop > -2:
-                self.status = Character.Conditions.Dead
-            else:
-                self.status = Character.Conditions.Coma
-            self.hp = 0
-        else:
-            if hp_prop > 1.5:
-                if hp_prop < 3:
-                    self.status = Character.Conditions.Heavy_Wound  
-                else: 
-                    self.status = Character.Conditions.Middle_Wound
-            else:
-                self.status = Character.Conditions.Alive
 
 
 class Campaign:
