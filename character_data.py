@@ -64,7 +64,6 @@ class Campaign:
         return next((x for x in self.characters if x.name == char), None)
         
 
-
 class DnDServer:
     def __init__(self, current_c = "", campaigns = []):
         self.current_c = current_c

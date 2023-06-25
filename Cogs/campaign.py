@@ -5,6 +5,7 @@ import character_data
 from typing import List
 from client import Protocol
 from .Models.campaign import DeleteConfirm
+from data_control import *
 from discord import app_commands
 from discord.ext import commands
 
@@ -21,7 +22,7 @@ class Campaign(commands.Cog):
     async def get_campaigns(self, interaction: discord.Interaction, current: str
     ) -> List[app_commands.Choice[str]]:
         path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
-        camp = await self.get_file(path)
+        camp = await JsonDataControl.get_file(path)
         return [
             app_commands.Choice(name= x.name, value= x.name )
             for x in camp.campaigns if current.lower() in x.name.lower()
@@ -31,13 +32,13 @@ class Campaign(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     async def capaign_start(self, interaction: discord.Interaction, name: str):
         path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
-        camp = await self.get_file(path)
+        camp = await JsonDataControl.get_file(path)
         if camp.find_campain(name):
             await interaction.response.send_message(
                 'There is already a campaign with that name!')
             return
         camp.add_campain(name.strip())
-        self.save_update(path, camp)
+        JsonDataControl.save_update(path, camp)
         await interaction.response.send_message(f'Campaign `{name}` has been created!')
 
     @group.command(name="delete", description="Delete finished campaign!")
@@ -55,7 +56,7 @@ class Campaign(commands.Cog):
             description= "Check the list of all available campaigns on this server!")
     async def campaign_view(self, interaction: discord.Interaction):
         path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
-        camp = await self.get_file(path)
+        camp = await JsonDataControl.get_file(path)
         text = ''
         for i in camp.campaigns:
             text += ('# ' if i.name == camp.current_c else ' ') + i.name + '\n'
@@ -67,35 +68,11 @@ class Campaign(commands.Cog):
     @app_commands.checks.has_permissions(administrator=True)
     async def campaign_set(self, interaction: discord.Interaction, name: str):
         path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
-        camp = await self.get_file(path)
+        camp = await JsonDataControl.get_file(path)
         camp.current_c = name
-        self.save_update(path, camp)
+        JsonDataControl.save_update(path, camp)
         await interaction.response.send_message(
-            f'Campaign `{name}` has been set as Active!',
-            ephemeral=True)
-
-    #<========================================================>
-
-    async def get_file(self, path) -> character_data.DnDServer:
-        try:
-            with open(path, 'r') as file:
-                data = file.read().replace('\n', '')
-        except FileNotFoundError:
-            print('New DnD server!')
-            self.save_update(path, character_data.DnDServer())
-            with open(path, 'r') as file:
-                data = file.read().replace('\n', '')
-            
-        current_c = character_data.DnDServer(**json.loads(data))
-        current_c.campaigns = [character_data.Campaign.fromdict(x) for x in current_c.campaigns]
-        for camp in current_c.campaigns:
-            camp.characters = [character_data.Character.fromdict(x) for x in camp.characters]
-        return current_c
-
-    def save_update(self, path, data):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, 'w') as file:
-            file.write(data.toJSON())
+            f'## Campaign `{name}` has been set as Active!')
 
 async def setup(bot: Protocol):
     await bot.add_cog(Campaign(bot))

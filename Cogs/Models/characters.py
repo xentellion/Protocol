@@ -4,6 +4,12 @@ from client import Protocol
 from data_control import *
 
 
+def set_value(old_value: str, new_value: str):
+    return int(old_value) \
+        if new_value == "" \
+        else int(new_value)
+
+
 class StartForm(discord.ui.Modal): 
     c_name = discord.ui.TextInput(
         style= discord.TextStyle.short,
@@ -15,7 +21,7 @@ class StartForm(discord.ui.Modal):
     c_hp = discord.ui.TextInput(
         style=discord.TextStyle.short,
         required= True,
-        label = "Set Character hp",
+        label = "Set Character Health",
         placeholder= "10",
     )
 
@@ -57,14 +63,14 @@ class StartForm(discord.ui.Modal):
         new_char = character_data.Character(
             name= self.c_name.value,
             author= interaction.user.id,
-            hp= self.c_hp.value,
-            max_hp= self.c_hp.value,
-            energy= self.c_ep.value,
-            max_energy= self.c_ep.value,
-            reaction= self.c_rp.value,
-            max_reaction= self.c_rp.value,
-            style= self.c_sp.value,
-            max_style= self.c_sp.value
+            hp= int(self.c_hp.value),
+            max_hp= int(self.c_hp.value),
+            energy= int(self.c_ep.value),
+            max_energy= int(self.c_ep.value),
+            reaction= int(self.c_rp.value),
+            max_reaction= int(self.c_rp.value),
+            style= int(self.c_sp.value),
+            max_style= int(self.c_sp.value)
         )
         current.add_character(new_char)
         campaigns.update_campaign(current)
@@ -109,3 +115,72 @@ class DeleteConfirm(discord.ui.View):
             button = discord.ui.Button(label= self.titles[i], style= colors[i])
             button.callback = methods[i]
             self.add_item(button)
+
+
+class EditForm(discord.ui.Modal): 
+
+    c_hp = discord.ui.TextInput(
+        style=discord.TextStyle.short,
+        required= False,
+        label = "Edit Character Max Health",
+        placeholder= "10",
+    )
+
+    c_ep = discord.ui.TextInput(
+        style=discord.TextStyle.short,
+        required= False,
+        label = "Edit Character Max Energy",
+        placeholder= "10",
+    )
+
+    c_rp = discord.ui.TextInput(
+        style=discord.TextStyle.short,
+        required= False,
+        label = "Edit Character Reaction Points",
+        placeholder= "0",
+    )
+
+    c_sp = discord.ui.TextInput(
+        style=discord.TextStyle.short,
+        required= False,
+        label = "Edit Character Style Points",
+        placeholder= "0",
+    )
+
+    def __init__(self, bot:Protocol, char: str):      
+        self.bot = bot
+        self.char = char
+        super().__init__(title="Edit a character")
+
+    async def on_submit(self, interaction: discord.Interaction):
+        path = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
+        campaigns = await JsonDataControl.get_file(path)
+        current = campaigns.get_campain(campaigns.current_c)
+        
+        old_char = current.get_character(self.char)
+
+        if old_char is None:
+            await interaction.response.send_message(
+                'There is no character with that name!')
+            return
+
+        new_char = character_data.Character(
+            name= old_char.name,
+            author= interaction.user.id,
+            hp= set_value(old_char.hp, self.c_hp.value),
+            max_hp= set_value(old_char.max_hp, self.c_hp.value),
+            energy= set_value(old_char.energy, self.c_ep.value),
+            max_energy= set_value(old_char.max_energy, self.c_ep.value),
+            reaction= set_value(old_char.reaction, self.c_rp.value),
+            max_reaction= set_value(old_char.max_reaction, self.c_rp.value),
+            style= set_value(old_char.style, self.c_sp.value),
+            max_style= set_value(old_char.max_style, self.c_sp.value)
+        )
+
+        current.remove_character(self.char)
+        current.add_character(new_char)
+        campaigns.update_campaign(current)
+        JsonDataControl.save_update(path, campaigns)
+        await interaction.response.send_message(
+            f'Character `{new_char.name}` has been updated!',
+            ephemeral=False)
