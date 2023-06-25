@@ -25,12 +25,6 @@ class Character:
         self.style = style
         self.max_style = max_style
 
-    def increase_value(self, value, change: int):
-        value += change
-
-    def reduce_value(self, value, change: int):
-        value -= change
-
     def small_rest(self):
         self.heal_hp(math.ceil(self.max_hp / 4))
         self.give_energy(math.ceil(self.max_hp / 2))
