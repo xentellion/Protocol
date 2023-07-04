@@ -12,7 +12,7 @@ from discord.ext import commands
 class Characters(commands.Cog):
     group = app_commands.Group(
         name="char", 
-        description="Set of commands for handling caracters")
+        description="Set of commands for handling characters")
     
     def __init__(self, bot: Protocol):
         self.bot = bot
@@ -330,6 +330,7 @@ class Characters(commands.Cog):
         JsonDataControl.save_update(path, campaigns)
         await interaction.response.send_message(
                 f"{name} has rested and restored some energy and health!", ephemeral= True)
+
 
 async def setup(bot: Protocol):
     await bot.add_cog(Characters(bot))
