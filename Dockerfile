@@ -7,9 +7,8 @@ RUN apt update && \
 
 RUN mkdir /root/.ssh/
 
-WORKDIR /
-ADD . ./Protocol
 WORKDIR /Protocol
+ADD . .
 RUN mkdir -p ./Protocol/Data
  
 RUN pip install -r requirements.txt
