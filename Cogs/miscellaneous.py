@@ -64,6 +64,13 @@ class Misc(commands.Cog):
         synced = await ctx.bot.tree.sync()
         await ctx.send(f"Synced {len(synced)} commands globally")
         return
+    
+    # @commands.command(name="servers")
+    # async def servers(self, ctx) -> None:
+    #     t = ""
+    #     for guild in self.bot.guilds:
+    #         t += f"{guild.name}\n"
+    #     await ctx.send(t)
 
 async def setup(bot):
     await bot.add_cog(Misc(bot))

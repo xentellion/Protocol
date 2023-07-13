@@ -32,7 +32,7 @@ class Combat:
             self.turn = 0
         else:
             self.turn += 1
-            if self.turn == len(self.actors):
+            if self.turn >= len(self.actors):
                 self.round += 1
                 self.turn = 0
 
