@@ -105,6 +105,7 @@ class Combat(commands.Cog):
             f"({rand}) {'+' if int(mod) > 0 else '-'} {mod.lstrip('+-')} = `{numb}`.")
 
     @group.command(name="remove", description="Leave the combat")
+    @app_commands.autocomplete(name = get_characters)
     async def remove(self, interaction: discord.Interaction, name:str):
         path = f'{self.bot.data_folder}{interaction.channel.id}.json'
         combat = await self.get_file_data(interaction, path)

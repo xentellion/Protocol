@@ -128,12 +128,12 @@ class DeleteConfirm(discord.ui.View):
         path = self.bot.data_folder + 'characters.csv'
         self.bot.characters.to_csv(path)
         self.bot.characters = pd.read_csv(path, index_col= 0)
-        await interaction.response.send_message("Персонаж удален", ephemeral=True)
+        await interaction.response.edit_message(
+            content="Персонаж удален", view = None)
 
     async def page_no(self, interaction: discord.Interaction):
-        await interaction.response.send_message("Отмена удаления", ephemeral=True)
-        await interaction.delete_original_response()
-        self.clear_items()
+        await interaction.response.edit_message(
+            content = "Отмена удаления", view = None)
 
     def add_buttons(self):     
         colors = [
