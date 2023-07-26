@@ -1,8 +1,11 @@
-from discord.ext import commands
-from enums import Enums
-import pandas as pd
 import asyncio
 import discord
+import pandas as pd
+from enums import Enums
+from discord import app_commands
+from discord.ext import commands
+from .Models.help import HelpView
+
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -22,6 +25,15 @@ class Misc(commands.Cog):
         df.to_csv(path)
         print(f'> Total characters: {len(df.index)}')
         print(f'{self.bot.user.name} has connected to Discord')
+
+    @app_commands.command(name= "help", description= "Get Protocol info!")
+    async def help(self, interaction: discord.Interaction):
+        view = HelpView(self.bot)
+        await interaction.response.send_message(
+            embed= view.set_embed(self.bot.help[0]),
+            view= view, 
+            ephemeral= True
+        )
 
     @commands.command(name='message')
     async def message(self, ctx, *, arg):
