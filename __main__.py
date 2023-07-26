@@ -22,10 +22,6 @@ protocol = Protocol(
 
 protocol.remove_command('help')
 
-@protocol.event
-async def on_thread_update(thread):
-    thread.join()
-
 async def main():
     for f in os.listdir('./Cogs'):
         if f.endswith('.py'):

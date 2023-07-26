@@ -1,6 +1,5 @@
 import discord
 import random
-import math
 import combat_data
 from typing import List
 from client import Protocol
@@ -66,6 +65,8 @@ class Combat(commands.Cog):
     async def init_end(self, interaction: discord.Interaction):
         path = f'{self.bot.data_folder}{interaction.channel.id}.json'
         combat = await self.get_file_data(interaction, path)
+        for temp in combat.temp_chars:
+            await self.remove_temp_char(interaction, temp, combat)
         msg = await interaction.channel.fetch_message(combat.message)
         await msg.unpin()
         os.remove(path)
@@ -73,7 +74,7 @@ class Combat(commands.Cog):
 
     @group.command(name="add", description="Join the combat!")
     async def add(self, interaction: discord.Interaction, 
-                  mod:str, name:str):
+                  mod:str, name:str, hp:str = None, en:str = None):
         if not mod.lstrip("+-").isdigit():
             await interaction.response.send_message(
                 "Modifier is not a number!", ephemeral=True)
@@ -82,6 +83,11 @@ class Combat(commands.Cog):
             await interaction.response.send_message(
                 "Name too short", ephemeral=True)
             return
+        if hp is not None and en is not None:
+            if not (hp.isdigit() and en.isdigit()) :
+                await interaction.response.send_message(
+                    "Stats are not a number!", ephemeral=True)
+                return
         
         path = f'{self.bot.data_folder}{interaction.channel.id}.json'
         combat = await self.get_file_data(interaction, path)
@@ -98,6 +104,30 @@ class Combat(commands.Cog):
         combat.add_actors(actor)
         if numb >= combat.get_current().initiative and len(combat.actors) > 1:
             combat.turn += 1
+
+        # add temporary character
+        if hp is not None and en is not None:
+            path_c = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
+            campaigns = await JsonDataControl.get_file(path_c)
+            current = campaigns.get_campain(campaigns.current_c)
+            if current is not None:
+                new_char = character_data.Character(
+                    name= name,
+                    author= interaction.user.id,
+                    hp= int(hp),
+                    max_hp= int(hp),
+                    energy= int(en),
+                    max_energy= int(en),
+                    reaction= 0,
+                    max_reaction= 0,
+                    style= 0,
+                    max_style= 0
+                )
+                current.add_character(new_char)
+                campaigns.update_campaign(current)
+                JsonDataControl.save_update(path_c, campaigns)
+                combat.temp_chars.append(name)
+
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
         await interaction.response.send_message(
@@ -123,6 +153,9 @@ class Combat(commands.Cog):
             await interaction.response.send_message(
                 f'`{name}` has not been found', ephemeral=True)
             return
+        if name in combat.temp_chars:
+            await self.remove_temp_char(interaction, name, combat)
+            
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
         await interaction.response.send_message(
@@ -190,7 +223,7 @@ class Combat(commands.Cog):
             if new_pos <= 0:
                 actor.initiative = combat.actors[0].initiative + 1
             # set last
-            elif new_pos >= len(combat.actors):
+            elif new_pos >= len(combat.actors) - 1:
                 actor.initiative = combat.actors[-1].initiative - 1
             # Otherwise
             else:
@@ -207,13 +240,16 @@ class Combat(commands.Cog):
                 actor.initiative = up_init - 1
         # Analaize Queue
         combat.actors = sorted(combat.actors, key=lambda x: x.initiative, reverse=True)
-        if combat.turn >= combat.actors.index(actor):
+        new_index = combat.actors.index(actor)
+        if index > combat.turn >= new_index:
             combat.turn += 1
+        elif index < combat.turn <= new_index:
+            combat.turn -= 1
         # save
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
         await interaction.response.send_message(
-            f"{name} has moved in queue from position `{1 + index}` to `{1 + combat.actors.index(actor)}`!")
+            f"{name} has moved in queue from position `{1 + index}` to `{1 + new_index}`!")
 
     #<------------------------------------------------------------>
 
@@ -240,6 +276,19 @@ class Combat(commands.Cog):
         c = combat_data.Combat(**json.loads(data))
         c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
         return c
+    
+    async def remove_temp_char(self, interaction, name, combat):
+        combat.temp_chars.remove(name)
+        path_c = f'{self.bot.data_folder}Campaigns/{interaction.guild.id}.json'
+        campaigns = await JsonDataControl.get_file(path_c)
+        current_c = campaigns.get_campain(campaigns.current_c)
+        try:
+            current_c.remove_character(name)
+        except:
+                combat.temp_chars.remove(name)
+                print('Failed to remove')
+        campaigns.update_campaign(current_c)
+        JsonDataControl.save_update(path_c, campaigns)
 
 
 async def setup(bot: Protocol):

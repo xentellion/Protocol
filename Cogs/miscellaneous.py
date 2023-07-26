@@ -45,9 +45,16 @@ class Misc(commands.Cog):
             await ctx.send("Time can be set anly between 0 and 600 seconds")
             return
         await ctx.message.delete()
-        mes = await ctx.send(arg)
+        webhook = await ctx.channel.create_webhook(name='The Protocol')
+        message = await webhook.send(
+            content=arg, 
+            username=ctx.message.author.display_name, 
+            avatar_url=ctx.message.author.display_avatar.url,
+            wait=True
+            )
         await asyncio.sleep(_time)
-        await mes.delete()
+        await message.delete()
+        await webhook.delete()
 
     @commands.command()
     async def protocol(self, ctx):
@@ -55,7 +62,7 @@ class Misc(commands.Cog):
             title='**ПРОТОКОЛ ИНИЦИИРОВАН**',
             color=discord.Color.gold()
         )
-        embed.set_image(url='https://cdn.discordapp.com/attachments/891746827798454343/945271937339371530/dfe33c069124f36c.png')
+        embed.set_image(url='https://cdn.discordapp.com/attachments/1133840435014545488/1133849046281363486/protocol.png')
         await ctx.send(embed=embed)
 
     @commands.command(name='sync') 

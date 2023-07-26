@@ -12,12 +12,13 @@ class Actor:
         self.initiative = initiative
 
 class Combat:
-    def __init__(self, channel, message, round:int=0, turn:int=0,  actors=[]):
+    def __init__(self, channel, message, round:int=0, turn:int=0,  actors=[], temp_chars=[]):
         self.channel = channel
         self.message = message
         self.round = round
         self.turn = turn
         self.actors = actors  
+        self.temp_chars = temp_chars
         
     def add_actors(self, actor):
         self.actors.append(actor)

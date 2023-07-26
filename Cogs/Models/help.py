@@ -4,7 +4,7 @@ from client import Protocol
 
 class HelpView(discord.ui.View):
     def __init__(self, bot:Protocol) -> None:
-        super().__init__(timeout= 10)
+        super().__init__()
         self.bot = bot
         self.titles = ["⬅️", "↩️", "➡️"]
         self.page = 0
@@ -56,9 +56,8 @@ class HelpView(discord.ui.View):
         for item in data.get(key):
             k = next(iter(item))
             text += f"**{k}** - {item.get(k)}\n"
-        embed = discord.Embed(
+        return discord.Embed(
             title= key,
             description= text,
             color= discord.Colour.gold()
         )
-        return embed

@@ -46,7 +46,6 @@ class Twitter(commands.Cog):
     @app_commands.autocomplete(character=get_character)
     async def twitter_ts(self, interaction: discord.Interaction, character:str):
         await interaction.response.send_modal(TopicStarter(self.bot, character))
-        
 
     @group.command(name="delete_account", description= "Delete your character")
     @app_commands.autocomplete(character=get_character)
