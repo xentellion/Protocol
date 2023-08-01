@@ -17,7 +17,7 @@ protocol = Protocol(
     intents = intents,
     activity = activity,
     data_folder= './Data/',
-    config= 'config.yml'
+    config= 'config.json'
 )
 
 protocol.remove_command('help')
@@ -26,6 +26,6 @@ async def main():
     for f in os.listdir('./Cogs'):
         if f.endswith('.py'):
             await protocol.load_extension(f'Cogs.{f[:-3]}')
-    await protocol.start(protocol.config['DISCORD_TOKEN'])
+    await protocol.start(protocol.config.token)
 
 asyncio.run(main())
