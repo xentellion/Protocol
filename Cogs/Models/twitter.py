@@ -125,6 +125,7 @@ class DeleteConfirm(discord.ui.View):
 
     async def page_yes(self, interaction: discord.Interaction):
         self.bot.characters = self.bot.characters.drop(self.char.index[0])
+        self.bot.characters = self.bot.characters.reset_index(drop=True)
         path = self.bot.data_folder + 'characters.csv'
         self.bot.characters.to_csv(path)
         self.bot.characters = pd.read_csv(path, index_col= 0)
