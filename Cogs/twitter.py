@@ -32,6 +32,14 @@ class Twitter(commands.Cog):
             app_commands.Choice(name=choice.name, value=str(choice.id))
             for choice in choices if current.lower() in choice.name.lower()
         ]
+        
+    async def get_forum_tags(self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[discord.ForumTag]]:
+        choices = interaction.channel.parent.available_tags
+        return [
+            app_commands.Choice(name=choice.name, value=str(choice.id))
+            for choice in choices if current.lower() in choice.name.lower()
+        ]
     
     @group.command(name="register", description= "Log in to write as your character")
     async def twitter_login(self, interaction: discord.Interaction):
@@ -39,13 +47,13 @@ class Twitter(commands.Cog):
 
     @group.command(name="send", description= "Write as your character!")
     @app_commands.autocomplete(character=get_character)
-    async def twitter_post(self, interaction: discord.Interaction, character:str):
-        await interaction.response.send_modal(Message(self.bot, character))
+    async def twitter_post(self, interaction: discord.Interaction, character:str, image_url:str=None):
+        await interaction.response.send_modal(Message(self.bot, character, image_url))
 
     @group.command(name="start_topic", description= "Start your character topic in forum!")
-    @app_commands.autocomplete(character=get_character)
-    async def twitter_ts(self, interaction: discord.Interaction, character:str):
-        await interaction.response.send_modal(TopicStarter(self.bot, character))
+    @app_commands.autocomplete(character=get_character, tag=get_forum_tags)
+    async def twitter_ts(self, interaction: discord.Interaction, character:str, tag:str=None, image_url:str=None):
+        await interaction.response.send_modal(TopicStarter(self.bot, character, tag, image_url))
 
     @group.command(name="delete_account", description= "Delete your character")
     @app_commands.autocomplete(character=get_character)

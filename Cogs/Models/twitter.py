@@ -1,3 +1,4 @@
+import io
 import discord
 import pandas as pd
 from client import Protocol
@@ -47,31 +48,55 @@ class Message(discord.ui.Modal):
         max_length=2000
     )
 
-    def __init__(self, bot:Protocol, char):      
+    def __init__(self, bot:Protocol, char, image_url:str=None):      
         self.bot = bot
         super().__init__(title="Напишите сообщение")
         self.character = char
+        self.url = image_url
 
     async def on_submit(self, interaction: discord.Interaction, ):
         df = self.bot.characters
         char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == self.character)]
         webhook = None
-
+        file = None
+        if self.url is not None:
+            asset = discord.Asset(self.bot._connection, url=self.url, key='')
+            with io.BytesIO(await asset.read()) as a:
+                file= discord.File(
+                    a, filename='0.png'
+                )
         try:
             webhook = await interaction.channel.create_webhook(name='Protocol1')
-            await webhook.send(
-                content= self.login.value, 
-                username= f"{df.at[char.index[0], 'login']}", 
-                avatar_url= f"{df.at[char.index[0], 'avatar']}",
-                wait= True)
+            if file is None:
+                await webhook.send(
+                    content= self.login.value, 
+                    username= f"{df.at[char.index[0], 'login']}", 
+                    avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                    wait= True)
+            else:
+                await webhook.send(
+                    content= self.login.value, 
+                    username= f"{df.at[char.index[0], 'login']}", 
+                    avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                    file= file,
+                    wait= True)
         except:
             webhook = await interaction.channel.parent.create_webhook(name='Protocol2')
-            await webhook.send(
-                content= self.login.value, 
-                username= f"{df.at[char.index[0], 'login']}", 
-                avatar_url= f"{df.at[char.index[0], 'avatar']}",
-                thread= interaction.channel,
-                wait= True)
+            if file is None:
+                await webhook.send(
+                    content= self.login.value, 
+                    username= f"{df.at[char.index[0], 'login']}", 
+                    avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                    thread= interaction.channel,
+                    wait= True)
+            else:
+                await webhook.send(
+                    content= self.login.value, 
+                    username= f"{df.at[char.index[0], 'login']}", 
+                    avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                    file= file,
+                    thread= interaction.channel,
+                    wait= True)
          
         await webhook.delete()
         await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
@@ -94,22 +119,47 @@ class TopicStarter(discord.ui.Modal):
         max_length=2000
     )
 
-    def __init__(self, bot:Protocol, char):      
+    def __init__(self, bot:Protocol, char, tag, image_url):      
         self.bot = bot
         super().__init__(title="Начните обсуждение в форуме")
         self.character = char
+        self.tag = tag
+        self.url = image_url
 
-    async def on_submit(self, interaction: discord.Interaction, ):
+    async def on_submit(self, interaction: discord.Interaction):
         df = self.bot.characters
         char = df.loc[(df['user'] == interaction.user.id) & (df['login'] == self.character)]
         webhook = await interaction.channel.parent.create_webhook(name='Protocol2')
-
-        await webhook.send(
-            thread_name= self.topic_title.value,
-            content= self.topic_text.value, 
-            username= f"{df.at[char.index[0], 'login']}", 
-            avatar_url= f"{df.at[char.index[0], 'avatar']}",
-            wait= True)
+        
+        file = None
+        if self.url is not None:
+            asset = discord.Asset(self.bot._connection, url=self.url, key='')
+            with io.BytesIO(await asset.read()) as a:
+                file= discord.File(
+                    a, filename='0.png'
+                )
+        message = None
+        if file is None:
+            message = await webhook.send(
+                thread_name= self.topic_title.value,
+                content= self.topic_text.value, 
+                username= f"{df.at[char.index[0], 'login']}", 
+                avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                wait= True)
+        else:
+            message = await webhook.send(
+                thread_name= self.topic_title.value,
+                content= self.topic_text.value, 
+                username= f"{df.at[char.index[0], 'login']}", 
+                avatar_url= f"{df.at[char.index[0], 'avatar']}",
+                file= file,
+                wait= True)
+        
+        if self.tag is not None:
+            topic = await self.bot.fetch_channel(message.channel.id)
+            tags = topic.parent.available_tags
+            tag = next(x for x in tags if x.id == int(self.tag))
+            await topic.add_tags(tag)
          
         await webhook.delete()
         await interaction.response.send_message("Сообщение отправлено ✅", ephemeral=True)
