@@ -1,6 +1,7 @@
 .env
 /Data/*
 !.gitkeep
+!help.yml
 /.vscode
 
 # Byte-compiled / optimized / DLL files

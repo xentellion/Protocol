@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 from youtube_dl import YoutubeDL
-import asyncio
+
 
 class Song:
     def __init__(self, info):
@@ -9,10 +9,12 @@ class Song:
         self.title = info['title']
         self.time = int(info['duration'])
 
+
 class ServerPlay:
-    def __init__(self, channel:discord.VoiceChannel):
+    def __init__(self, channel: discord.VoiceChannel):
         self.channel = channel
         self.playlist = []
+
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -26,12 +28,12 @@ class Music(commands.Cog):
         self.music_queue = []
 
         self.YDL_OPTIONS = {
-            'format': 'bestaudio', 
-            'noplaylist':'True'
+            'format': 'bestaudio',
+            'noplaylist': 'True'
         }
 
         self.FFMPEG_OPTIONS = {
-            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 
+            'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
             'options': '-vn'
         }
 
@@ -40,23 +42,25 @@ class Music(commands.Cog):
     def search_youtube(self, url):
         with YoutubeDL(self.YDL_OPTIONS) as ydl:
             try:
-                info = ydl.extract_info("ytsearch:%s"% url, download=False)['entries'][0]
+                info = ydl.extract_info("ytsearch:%s" %
+                                        url, download=False)['entries'][0]
                 return Song(info)
             except:
                 return 0
 
-    def play_next(self):     
+    def play_next(self):
         if len(self.music_queue) > 0:
             # time = self.music_queue[0][0].time
             # await ctx.send(f"**Now playing:** {self.music_queue[0][0].title} `[{time//60}:{time%60}]`")
             self.music_queue.pop(0)
             self.is_playing = True
-            
+
             # get first url may actually pop up
             m_url = self.music_queue[0][0].source
 
-            #play actually
-            self.vc.play(discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
+            # play actually
+            self.vc.play(discord.FFmpegPCMAudio(
+                m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
             self.vc.source = discord.PCMVolumeTransformer(self.vc.source)
             self.vc.source.volume = 0.10
         else:
@@ -64,7 +68,7 @@ class Music(commands.Cog):
 
     async def play_music(self, ctx):
         if len(self.music_queue) > 0:
-            self.is_playing= True
+            self.is_playing = True
 
             m_url = self.music_queue[0][0].source
 
@@ -75,12 +79,13 @@ class Music(commands.Cog):
                 await self.vc.move_to(self.music_queue[0][1])
             time = self.music_queue[0][0].time
             await ctx.send(f"**Now playing:** {self.music_queue[0][0].title} `[{time//60}:{time%60}]`")
-            self.vc.play(discord.FFmpegPCMAudio(m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
+            self.vc.play(discord.FFmpegPCMAudio(
+                m_url, **self.FFMPEG_OPTIONS), after=lambda e: self.play_next())
             self.vc.source = discord.PCMVolumeTransformer(self.vc.source)
             self.vc.source.volume = 0.10
         else:
             self.is_playing = False
-    
+
     @commands.command(aliases=["play"], help="Plays a selected song from youtube")
     async def p(self, ctx, *args):
         query = " ".join(args)
@@ -103,7 +108,7 @@ class Music(commands.Cog):
     @commands.command(aliases=["queue"], help="Displays the current songs in queue")
     async def q(self, ctx):
         songs = ""
-        for i in range (0, len(self.music_queue)):
+        for i in range(0, len(self.music_queue)):
             songs += self.music_queue[i][0].title + '\n'
 
         if songs != "":
@@ -119,7 +124,7 @@ class Music(commands.Cog):
                 await self.play_music(ctx)
             else:
                 await ctx.send('Playlist is over')
-            
+
     @commands.command(aliases=["disconnect"], help="Disconnecting bot from VC")
     async def dc(self, ctx):
         await self.vc.disconnect()
@@ -144,10 +149,11 @@ class Music(commands.Cog):
     async def on_voice_state_update(self, member, before, after):
         voice_state = member.guild.voice_client
         if voice_state is None:
-            return 
+            return
         elif len(voice_state.channel.members) == 1:
             self.music_queue = []
             await voice_state.disconnect()
+
 
 async def setup(bot):
     await bot.add_cog(Music(bot))

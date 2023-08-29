@@ -1,9 +1,10 @@
 import json
 
+
 class Actor:
     @classmethod
     def fromdict(cls, d):
-        df = {k : v for k, v in d.items()}
+        df = {k: v for k, v in d.items()}
         return cls(**df)
 
     def __init__(self, name: str, author, initiative: int):
@@ -11,21 +12,24 @@ class Actor:
         self.author = author
         self.initiative = initiative
 
+
 class Combat:
-    def __init__(self, channel, message, round:int=0, turn:int=0,  actors=[], temp_chars=[]):
+    def __init__(self, channel, message, round: int = 0, turn: int = 0,  actors=[], temp_chars=[]):
         self.channel = channel
         self.message = message
         self.round = round
         self.turn = turn
-        self.actors = actors  
+        self.actors = actors
         self.temp_chars = temp_chars
-        
+
     def add_actors(self, actor):
         self.actors.append(actor)
-        self.actors = sorted(self.actors, key=lambda x: x.initiative, reverse=True)
+        self.actors = sorted(
+            self.actors, key=lambda x: x.initiative, reverse=True)
 
     def remove_actors(self, actor: str):
-        self.actors.remove(next((x for x in self.actors if x.name == actor), None))
+        self.actors.remove(
+            next((x for x in self.actors if x.name == actor), None))
 
     def next_turn(self):
         if self.round == 0:

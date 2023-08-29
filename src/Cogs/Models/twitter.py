@@ -1,8 +1,8 @@
 import io
 import discord
 import pandas as pd
-from client import Protocol
-from enums import Enums
+from src.client import Protocol
+from src.enums import Enums
 
 
 class Form(discord.ui.Modal):  

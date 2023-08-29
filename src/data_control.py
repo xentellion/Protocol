@@ -1,6 +1,6 @@
 import os
 import json
-import character_data
+import src.character_data as character_data
 
 
 class JsonDataControl:
@@ -14,11 +14,13 @@ class JsonDataControl:
             with open(path, 'a+') as file:
                 file.write(character_data.DnDServer().toJSON())
                 data = file.read().replace('\n', '')
-            
+
         current_c = character_data.DnDServer(**json.loads(data))
-        current_c.campaigns = [character_data.Campaign.fromdict(x) for x in current_c.campaigns]
+        current_c.campaigns = [
+            character_data.Campaign.fromdict(x) for x in current_c.campaigns]
         for camp in current_c.campaigns:
-            camp.characters = [character_data.Character.fromdict(x) for x in camp.characters]
+            camp.characters = [
+                character_data.Character.fromdict(x) for x in camp.characters]
         return current_c
 
     def save_update(path, data) -> None:
