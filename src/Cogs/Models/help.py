@@ -38,13 +38,9 @@ class HelpView(discord.ui.View):
         colors = [
             discord.ButtonStyle.blurple,
             discord.ButtonStyle.blurple,
-            discord.ButtonStyle.blurple
+            discord.ButtonStyle.blurple,
         ]
-        methods = [
-            self.page_back,
-            self.page_home,
-            self.page_next
-        ]
+        methods = [self.page_back, self.page_home, self.page_next]
         for i in range(len(methods)):
             button = discord.ui.Button(label=self.titles[i], style=colors[i])
             button.callback = methods[i]
@@ -56,8 +52,4 @@ class HelpView(discord.ui.View):
         for item in data.get(key):
             k = next(iter(item))
             text += f"**{k}** - {item.get(k)}\n"
-        return discord.Embed(
-            title=key,
-            description=text,
-            color=discord.Colour.gold()
-        )
+        return discord.Embed(title=key, description=text, color=discord.Colour.gold())

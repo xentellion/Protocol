@@ -7,14 +7,14 @@ from discord.ext import commands
 
 
 class ConfigFile:
-    def __init__(self, prefix: str = '', token: str = ''):
+    def __init__(self, prefix: str = "", token: str = ""):
         self.prefix = prefix
         self.token = token
 
 
 class EmptyConfig(Exception):
     def __init__(self, config_path: str):
-        self.message = f'Please, set up variables in {config_path}'
+        self.message = f"Please, set up variables in {config_path}"
         super().__init__(self.message)
 
 
@@ -24,7 +24,7 @@ class Protocol(commands.Bot):
         os.makedirs(self.data_folder, exist_ok=True)
         self.config_path = self.data_folder + config
 
-        with open(self.config_path, 'a+', encoding="utf8") as file:
+        with open(self.config_path, "a+", encoding="utf8") as file:
             file.seek(0)
             try:
                 data = json.load(file)
@@ -32,16 +32,13 @@ class Protocol(commands.Bot):
                 if self.config.token == "":
                     raise EmptyConfig(self.config_path)
             except JSONDecodeError:
-                json.dump(ConfigFile().__dict__, file,
-                          sort_keys=False, indent=4)
+                json.dump(ConfigFile().__dict__, file, sort_keys=False, indent=4)
                 raise EmptyConfig(self.config_path)
 
-        with open(f'{data_folder}help.yml', 'r', encoding="utf8") as file:
+        with open(f"{data_folder}help.yml", "r", encoding="utf8") as file:
             self.help = list(yaml.safe_load(file))
         super().__init__(
-            command_prefix=self.config.prefix,
-            intents=intents,
-            activity=activity
+            command_prefix=self.config.prefix, intents=intents, activity=activity
         )
         self.characters = None
 

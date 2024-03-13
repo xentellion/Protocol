@@ -1,6 +1,5 @@
 import math
 import json
-import enum
 
 
 class Character:
@@ -9,11 +8,19 @@ class Character:
         df = {k: v for k, v in d.items()}
         return cls(**df)
 
-    def __init__(self, name: str, author: int,
-                 hp: int = 10, max_hp: int = 10,
-                 energy: int = 2, max_energy: int = 2,
-                 reaction: int = 0, max_reaction: int = 0,
-                 style: int = 0, max_style: int = 0):
+    def __init__(
+        self,
+        name: str,
+        author: int,
+        hp: int = 10,
+        max_hp: int = 10,
+        energy: int = 2,
+        max_energy: int = 2,
+        reaction: int = 0,
+        max_reaction: int = 0,
+        style: int = 0,
+        max_style: int = 0,
+    ):
         self.name = name
         self.author = author
         self.hp = hp
@@ -50,7 +57,8 @@ class Campaign:
 
     def remove_character(self, char: str):
         self.characters.remove(
-            next((x for x in self.characters if x.name == char), None))
+            next((x for x in self.characters if x.name == char), None)
+        )
 
     def check_character(self, char: str):
         return any((x for x in self.characters if x.name == char))
@@ -68,8 +76,7 @@ class DnDServer:
         self.campaigns.append(Campaign(name))
 
     def remove_campain(self, name):
-        self.campaigns.remove(
-            next((x for x in self.campaigns if x.name == name), None))
+        self.campaigns.remove(next((x for x in self.campaigns if x.name == name), None))
 
     def find_campain(self, name):
         return any(x for x in self.campaigns if x.name == name)
@@ -78,8 +85,7 @@ class DnDServer:
         return next(x for x in self.campaigns if x.name == name)
 
     def update_campaign(self, camp: Campaign):
-        self.campaigns = [camp if x.name ==
-                          camp.name else x for x in self.campaigns]
+        self.campaigns = [camp if x.name == camp.name else x for x in self.campaigns]
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

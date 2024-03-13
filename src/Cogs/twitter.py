@@ -10,36 +10,43 @@ from .Models.twitter import *
 
 class Twitter(commands.Cog):
     group = app_commands.Group(
-        name="twit",
-        description="Set of commands for handling caracters")
+        name="twit", description="Set of commands for handling caracters"
+    )
 
     def __init__(self, bot: Protocol):
         self.bot = bot
         super().__init__()
 
-    async def get_character(self, interaction: discord.Interaction, current: str
-                            ) -> List[app_commands.Choice[str]]:
-        choices = self.bot.characters.loc[self.bot.characters['user']
-                                          == interaction.user.id]['login']
+    async def get_character(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[str]]:
+        choices = self.bot.characters.loc[
+            self.bot.characters["user"] == interaction.user.id
+        ]["login"]
         return [
             app_commands.Choice(name=choice, value=choice)
-            for choice in choices if current.lower() in choice.lower()
+            for choice in choices
+            if current.lower() in choice.lower()
         ]
 
-    async def get_forums(self, interaction: discord.Interaction, current: str
-                         ) -> List[app_commands.Choice[discord.ForumChannel]]:
+    async def get_forums(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[discord.ForumChannel]]:
         choices = interaction.guild.forums
         return [
             app_commands.Choice(name=choice.name, value=str(choice.id))
-            for choice in choices if current.lower() in choice.name.lower()
+            for choice in choices
+            if current.lower() in choice.name.lower()
         ]
 
-    async def get_forum_tags(self, interaction: discord.Interaction, current: str
-                             ) -> List[app_commands.Choice[discord.ForumTag]]:
+    async def get_forum_tags(
+        self, interaction: discord.Interaction, current: str
+    ) -> List[app_commands.Choice[discord.ForumTag]]:
         choices = interaction.channel.parent.available_tags
         return [
             app_commands.Choice(name=choice.name, value=str(choice.id))
-            for choice in choices if current.lower() in choice.name.lower()
+            for choice in choices
+            if current.lower() in choice.name.lower()
         ]
 
     @group.command(name="register", description="Log in to write as your character")
@@ -48,33 +55,45 @@ class Twitter(commands.Cog):
 
     @group.command(name="send", description="Write as your character!")
     @app_commands.autocomplete(character=get_character)
-    async def twitter_post(self, interaction: discord.Interaction, character: str, image_url: str = None):
+    async def twitter_post(
+        self, interaction: discord.Interaction, character: str, image_url: str = None
+    ):
         await interaction.response.send_modal(Message(self.bot, character, image_url))
 
-    @group.command(name="start_topic", description="Start your character topic in forum!")
+    @group.command(
+        name="start_topic", description="Start your character topic in forum!"
+    )
     @app_commands.autocomplete(character=get_character, tag=get_forum_tags)
-    async def twitter_ts(self, interaction: discord.Interaction, character: str, tag: str = None, image_url: str = None):
-        await interaction.response.send_modal(TopicStarter(self.bot, character, tag, image_url))
+    async def twitter_ts(
+        self,
+        interaction: discord.Interaction,
+        character: str,
+        tag: str = None,
+        image_url: str = None,
+    ):
+        await interaction.response.send_modal(
+            TopicStarter(self.bot, character, tag, image_url)
+        )
 
     @group.command(name="delete_account", description="Delete your character")
     @app_commands.autocomplete(character=get_character)
     async def twitter_delete(self, interaction: discord.Interaction, character: str):
         df = self.bot.characters
-        char = df.loc[(df['user'] == interaction.user.id)
-                      & (df['login'] == character)]
+        char = df.loc[(df["user"] == interaction.user.id) & (df["login"] == character)]
         await interaction.response.send_message(
             "Вы уверены, что хотите удалить персонажа?",
             view=DeleteConfirm(self.bot, char),
-            ephemeral=True
+            ephemeral=True,
         )
 
     @group.command(name="change_avatar", description="Change character avatar")
     @app_commands.autocomplete(character=get_character)
-    async def change_avatar(self, interaction: discord.Interaction, character: str, *, avatar: str):
+    async def change_avatar(
+        self, interaction: discord.Interaction, character: str, *, avatar: str
+    ):
         df = self.bot.characters
-        char = df.loc[(df['user'] == interaction.user.id)
-                      & (df['login'] == character)]
-        df.at[char.index[0], 'avatar'] = avatar
+        char = df.loc[(df["user"] == interaction.user.id) & (df["login"] == character)]
+        df.at[char.index[0], "avatar"] = avatar
         path = self.bot.data_folder + Enums.default_char_list
         self.bot.characters = df
         self.bot.characters.to_csv(path)
