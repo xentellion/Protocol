@@ -24,7 +24,7 @@ class Characters(commands.Cog):
     ) -> List[app_commands.Choice[str]]:
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
-        campaign = server.get_campain(server.current_c)
+        campaign = server.get_campain(server.current_camp)
         if campaign is None:
             return None
         if interaction.user.guild_permissions.administrator:
@@ -62,7 +62,7 @@ class Characters(commands.Cog):
     async def add_char(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        if campaigns.find_campain(campaigns.current_c):
+        if campaigns.find_campain(campaigns.current_camp):
             await interaction.response.send_modal(StartForm(self.bot))
         else:
             await interaction.response.send_message("There is no active campaign!")
@@ -81,7 +81,7 @@ class Characters(commands.Cog):
     async def edit_char(self, interaction: discord.Interaction, name: str):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        if campaigns.find_campain(campaigns.current_c):
+        if campaigns.find_campain(campaigns.current_camp):
             await interaction.response.send_modal(EditForm(self.bot, name))
         else:
             await interaction.response.send_message("There is no active campaign!")
@@ -91,7 +91,7 @@ class Characters(commands.Cog):
     async def show_char(self, interaction: discord.Interaction, name: str):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return
@@ -117,7 +117,7 @@ class Characters(commands.Cog):
     ):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return
@@ -155,7 +155,7 @@ class Characters(commands.Cog):
     async def heal_char(self, interaction: discord.Interaction, name: str, heal: int):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return
@@ -187,7 +187,7 @@ class Characters(commands.Cog):
 
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return
@@ -259,7 +259,7 @@ class Characters(commands.Cog):
 
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return
@@ -320,7 +320,7 @@ class Characters(commands.Cog):
     async def rest_char(self, interaction: discord.Interaction, name: str, rest: str):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         if current is None:
             await interaction.response.send_message("There is no active campaign!")
             return

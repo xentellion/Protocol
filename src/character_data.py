@@ -72,13 +72,15 @@ class DnDServer:
         self.current_c = current_c
         self.campaigns = campaigns
 
-    def add_campain(self, name):
+    def __add__(self, name):
         self.campaigns.append(Campaign(name))
+        return self
 
-    def remove_campain(self, name):
+    def __sub__(self, name):
         self.campaigns.remove(next((x for x in self.campaigns if x.name == name), None))
+        return self
 
-    def find_campain(self, name):
+    def find_campain(self, name) -> bool:
         return any(x for x in self.campaigns if x.name == name)
 
     def get_campain(self, name) -> Campaign:
@@ -87,5 +89,5 @@ class DnDServer:
     def update_campaign(self, camp: Campaign):
         self.campaigns = [camp if x.name == camp.name else x for x in self.campaigns]
 
-    def toJSON(self):
+    def toJSON(self) -> str:
         return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)

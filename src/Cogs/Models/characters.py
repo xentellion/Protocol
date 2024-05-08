@@ -1,5 +1,5 @@
 import discord
-import src.character_data as character_data
+import src.character_data as char_data
 from src.client import Protocol
 from src.data_control import *
 
@@ -51,7 +51,7 @@ class StartForm(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
 
         if current.check_character(self.c_name.value):
             await interaction.response.send_message(
@@ -59,7 +59,7 @@ class StartForm(discord.ui.Modal):
             )
             return
 
-        new_char = character_data.Character(
+        new_char = char_data.Character(
             name=self.c_name.value,
             author=interaction.user.id,
             hp=int(self.c_hp.value),
@@ -90,7 +90,7 @@ class DeleteConfirm(discord.ui.View):
     async def page_yes(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
         current.remove_character(self.char)
         campaigns.update_campaign(current)
         JsonDataControl.save_update(path, campaigns)
@@ -148,7 +148,7 @@ class EditForm(discord.ui.Modal):
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
+        current = campaigns.get_campain(campaigns.current_camp)
 
         old_char = current.get_character(self.char)
 
@@ -158,7 +158,7 @@ class EditForm(discord.ui.Modal):
             )
             return
 
-        new_char = character_data.Character(
+        new_char = char_data.Character(
             name=old_char.name,
             author=interaction.user.id,
             hp=set_value(old_char.hp, self.c_hp.value),

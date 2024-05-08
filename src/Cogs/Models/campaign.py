@@ -14,7 +14,7 @@ class DeleteConfirm(discord.ui.View):
     async def page_yes(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         camp = await JsonDataControl.get_file(path)
-        camp.remove_campain(self.campaign)
+        camp -= self.campaign
         JsonDataControl.save_update(path, camp)
         await interaction.response.edit_message(
             content="## Campaign Deleted", view=None

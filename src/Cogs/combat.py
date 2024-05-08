@@ -126,9 +126,9 @@ class Combat(commands.Cog):
         if hp is not None and en is not None:
             path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
             campaigns = await JsonDataControl.get_file(path_c)
-            current = campaigns.get_campain(campaigns.current_c)
+            current = campaigns.get_campain(campaigns.current_camp)
             if current is not None:
-                new_char = character_data.Character(
+                new_char = char_data.Character(
                     name=name,
                     author=interaction.user.id,
                     hp=int(hp),
@@ -310,7 +310,7 @@ class Combat(commands.Cog):
         combat.temp_chars.remove(name)
         path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         campaigns = await JsonDataControl.get_file(path_c)
-        current_c = campaigns.get_campain(campaigns.current_c)
+        current_c = campaigns.get_campain(campaigns.current_camp)
         try:
             current_c.remove_character(name)
         except:
