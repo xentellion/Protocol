@@ -1,16 +1,9 @@
-import math
 import json
 
 
 class Character:
-    @classmethod
-    def fromdict(cls, d):
-        df = {k: v for k, v in d.items()}
-        return cls(**df)
-
     def __init__(
         self,
-        name: str,
         author: int,
         hp: int = 10,
         max_hp: int = 10,
@@ -21,7 +14,6 @@ class Character:
         style: int = 0,
         max_style: int = 0,
     ):
-        self.name = name
         self.author = author
         self.hp = hp
         self.max_hp = max_hp
@@ -32,62 +24,43 @@ class Character:
         self.style = style
         self.max_style = max_style
 
-    def small_rest(self):
-        self.heal_hp(math.ceil(self.max_hp / 4))
-        self.give_energy(math.ceil(self.max_hp / 2))
-
-    def big_rest(self):
-        self.heal_hp(math.ceil(self.max_hp / 2))
-        self.give_energy(self.max_hp)
-
 
 class Campaign:
-    @classmethod
-    def fromdict(cls, d):
-        df = {k: v for k, v in d.items()}
-        return cls(**df)
-
-    def __init__(self, name: str, characters=[]):
-        self.name = name
+    def __init__(self, characters: dict[str, Character] = {}):
         self.characters = characters
 
-    def add_character(self, char: Character):
-        self.characters.append(char)
-        self.characters = sorted(self.characters, key=lambda x: x.name)
+    def __len__(self):
+        return len(self.characters.keys())
 
-    def remove_character(self, char: str):
-        self.characters.remove(
-            next((x for x in self.characters if x.name == char), None)
-        )
+    def __setitem__(self, key, value):
+        self.characters[key] = value
 
-    def check_character(self, char: str):
-        return any((x for x in self.characters if x.name == char))
+    def __getitem__(self, key):
+        return Character(**self.characters[key])
 
-    def get_character(self, char: str):
-        return next((x for x in self.characters if x.name == char), None)
+    def __delitem__(self, key):
+        self.characters.pop(key)
+
+    def __contains__(self, item):
+        return item in self.characters
+
+    def __iter__(self):
+        for v in self.characters:
+            yield (v, self.__getitem__(v))
+
+    def __str__(self) -> str:
+        return json.dumps(self.characters, default=lambda o: o.__dict__, indent=4)
 
 
 class DnDServer:
-    def __init__(self, current_c="", campaigns=[]):
+    def __init__(self, current_c: str = "", campaigns: dict[str, Campaign] = {}):
         self.current_c = current_c
         self.campaigns = campaigns
 
-    def __add__(self, name):
-        self.campaigns.append(Campaign(name))
-        return self
-
-    def __sub__(self, name):
-        self.campaigns.remove(next((x for x in self.campaigns if x.name == name), None))
-        return self
-
-    def find_campain(self, name) -> bool:
-        return any(x for x in self.campaigns if x.name == name)
-
-    def get_campain(self, name) -> Campaign:
-        return next(x for x in self.campaigns if x.name == name)
-
-    def update_campaign(self, camp: Campaign):
-        self.campaigns = [camp if x.name == camp.name else x for x in self.campaigns]
+    def __str__(self) -> str:
+        return self.toJSON()
 
     def toJSON(self) -> str:
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(
+            self, default=lambda o: o.__dict__, indent=4, ensure_ascii=False
+        )

@@ -2,6 +2,7 @@ import discord
 from src.client import Protocol
 from .Models.campaign import DeleteConfirm
 from src.data_control import *
+from src.character_data import DnDServer
 from discord import app_commands
 from discord.ext import commands
 
@@ -23,37 +24,30 @@ class Campaign(commands.Cog):
         camp = await self.get_camp_data(interaction)
         if camp is None:
             return
-        return [
-            app_commands.Choice(name=x.name, value=x.name)
-            for x in camp.campaigns
-            if current.lower() in x.name.lower()
-        ]
+        return [app_commands.Choice(name=x, value=x) for x in camp.campaigns.keys()]
 
-    async def get_camp_data(self, interaction):
+    async def get_camp_data(self, interaction: discord.Interaction) -> DnDServer:
         try:
             path = self.path.format(interaction.guild.id)
             return await JsonDataControl.get_file(path)
         except json.decoder.JSONDecodeError:
-            await interaction.response.send_message(
-                "THERE ARE NO CAMPAIGNS ON THIS SERVER"
-            )
-            return
+            return await JsonDataControl.get_file(path)
 
     # CAMPAIGN START
     @group.command(name="start", description="Start new Campaign for new characters!")
-    @app_commands.checks.has_permissions(administrator=True)
+    # @app_commands.checks.has_permissions(administrator=True)
     #  ->
     async def campaign_start(self, interaction: discord.Interaction, name: str):
         camp = await self.get_camp_data(interaction)
         if camp is None:
             return
 
-        if camp.find_campain(name):
+        if name in camp.campaigns:
             await interaction.response.send_message(
                 "There is already a campaign with that name!"
             )
             return
-        camp += name.strip()
+        camp.campaigns[name] = {}
         camp.current_c = name
         JsonDataControl.save_update(self.path.format(interaction.guild.id), camp)
         await interaction.response.send_message(
@@ -83,8 +77,7 @@ class Campaign(commands.Cog):
         if camp is None:
             return
         text = "\n".join(
-            f"{'# ' if i.name == camp.current_c else '  '}{i.name}"
-            for i in camp.campaigns
+            f"{'# ' if i == camp.current_c else '  '}{i}" for i in camp.campaigns.keys()
         )
         if len(text) == 0:
             await interaction.response.send_message(

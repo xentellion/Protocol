@@ -7,14 +7,14 @@ class DeleteConfirm(discord.ui.View):
     def __init__(self, bot: Protocol, campaign: str) -> None:
         super().__init__(timeout=15)
         self.bot = bot
-        self.campaign = campaign
+        self.deleted_campaign = campaign
         self.titles = ["YES", "NO"]
         self.add_buttons()
 
     async def page_yes(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         camp = await JsonDataControl.get_file(path)
-        camp -= self.campaign
+        camp.campaigns.pop(self.deleted_campaign)
         JsonDataControl.save_update(path, camp)
         await interaction.response.edit_message(
             content="## Campaign Deleted", view=None

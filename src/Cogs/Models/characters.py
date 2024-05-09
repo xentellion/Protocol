@@ -1,11 +1,11 @@
 import discord
-import src.character_data as char_data
+from src.character_data import Character
 from src.client import Protocol
 from src.data_control import *
 
 
-def set_value(old_value: str, new_value: str):
-    return int(old_value) if new_value == "" else int(new_value)
+def set_value(old_value: int, new_value: str):
+    return old_value if new_value == "" else int(new_value)
 
 
 class StartForm(discord.ui.Modal):
@@ -50,17 +50,15 @@ class StartForm(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_camp)
+        server = await JsonDataControl.get_file(path)
 
-        if current.check_character(self.c_name.value):
+        if self.c_name.value in server.campaigns[server.current_c]:
             await interaction.response.send_message(
                 "There is already a character with that name!"
             )
             return
 
-        new_char = char_data.Character(
-            name=self.c_name.value,
+        new_char = Character(
             author=interaction.user.id,
             hp=int(self.c_hp.value),
             max_hp=int(self.c_hp.value),
@@ -71,11 +69,12 @@ class StartForm(discord.ui.Modal):
             style=int(self.c_sp.value),
             max_style=int(self.c_sp.value),
         )
-        current.add_character(new_char)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+
+        server.campaigns[server.current_c][self.c_name.value] = new_char
+
+        JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Character `{new_char.name}` has been created!", ephemeral=False
+            f"Character `{self.c_name.value}` has been created!", ephemeral=False
         )
 
 
@@ -89,11 +88,10 @@ class DeleteConfirm(discord.ui.View):
 
     async def page_yes(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_camp)
-        current.remove_character(self.char)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server = await JsonDataControl.get_file(path)
+        del server.campaigns[server.current_c][self.char]
+
+        JsonDataControl.save_update(path, server)
         await interaction.response.edit_message(
             content="## Character Deleted", view=None
         )
@@ -147,10 +145,9 @@ class EditForm(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_camp)
+        server = await JsonDataControl.get_file(path)
 
-        old_char = current.get_character(self.char)
+        old_char = Character(server.campaigns[server.current_c][self.char])
 
         if old_char is None:
             await interaction.response.send_message(
@@ -158,23 +155,21 @@ class EditForm(discord.ui.Modal):
             )
             return
 
-        new_char = char_data.Character(
-            name=old_char.name,
+        new_char = Character(
             author=interaction.user.id,
-            hp=set_value(old_char.hp, self.c_hp.value),
+            hp=old_char.hp,
             max_hp=set_value(old_char.max_hp, self.c_hp.value),
-            energy=set_value(old_char.energy, self.c_ep.value),
+            energy=old_char.energy,
             max_energy=set_value(old_char.max_energy, self.c_ep.value),
-            reaction=set_value(old_char.reaction, self.c_rp.value),
+            reaction=old_char.reaction,
             max_reaction=set_value(old_char.max_reaction, self.c_rp.value),
-            style=set_value(old_char.style, self.c_sp.value),
+            style=old_char.style,
             max_style=set_value(old_char.max_style, self.c_sp.value),
         )
 
-        current.remove_character(self.char)
-        current.add_character(new_char)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server.campaigns[server.current_c][self.char] = new_char
+
+        JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Character `{new_char.name}` has been updated!", ephemeral=False
+            f"Character `{self.char}` has been updated!", ephemeral=False
         )
