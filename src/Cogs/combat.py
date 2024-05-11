@@ -21,7 +21,7 @@ class Combat(commands.Cog):
     async def get_characters(
         self, interaction: discord.Interaction, char: str
     ) -> List[app_commands.Choice[str]]:
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
         if combat is None:
             return None
@@ -45,7 +45,7 @@ class Combat(commands.Cog):
         await interaction.response.send_message(
             "<:revolver:603601152885522465>", ephemeral=True
         )
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         try:
             with open(path) as f:
                 await interaction.response.send_message(
@@ -72,7 +72,7 @@ class Combat(commands.Cog):
     @group.command(name="end", description="Finish the combat")
     @app_commands.checks.has_permissions(administrator=True)
     async def init_end(self, interaction: discord.Interaction):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
         for temp in combat.temp_chars:
             await self.remove_temp_char(interaction, temp, combat)
@@ -105,7 +105,7 @@ class Combat(commands.Cog):
                 )
                 return
 
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
 
         if any(x for x in combat.actors if x.name == name):
@@ -125,11 +125,10 @@ class Combat(commands.Cog):
         # add temporary character
         if hp is not None and en is not None:
             path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-            campaigns = await JsonDataControl.get_file(path_c)
-            current = campaigns.get_campain(campaigns.current_camp)
-            if current is not None:
-                new_char = char_data.Character(
-                    name=name,
+            server = await JsonDataControl.get_file(path_c)
+            current = server.get_campain(server.current_camp)
+            if server[server.current_c] is not None:
+                new_char = Character(
                     author=interaction.user.id,
                     hp=int(hp),
                     max_hp=int(hp),
@@ -140,9 +139,8 @@ class Combat(commands.Cog):
                     style=0,
                     max_style=0,
                 )
-                current.add_character(new_char)
-                campaigns.update_campaign(current)
-                JsonDataControl.save_update(path_c, campaigns)
+                server[server.current_c][name]
+                JsonDataControl.save_update(path_c, server)
                 combat.temp_chars.append(name)
 
         JsonDataControl.save_update(path, combat)
@@ -155,7 +153,7 @@ class Combat(commands.Cog):
     @group.command(name="remove", description="Leave the combat")
     @app_commands.autocomplete(name=get_characters)
     async def remove(self, interaction: discord.Interaction, name: str):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
         if actor.name == name:
@@ -183,7 +181,7 @@ class Combat(commands.Cog):
 
     @group.command(name="next", description="Progress the queue")
     async def remove(self, interaction: discord.Interaction):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
         if (
@@ -210,7 +208,7 @@ class Combat(commands.Cog):
         direction: str,
         shift: str = None,
     ):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = f"{self.bot.data_folder}/Combat{interaction.channel.id}.json"
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_actor(name)
         index = combat.actors.index(actor)
@@ -306,18 +304,12 @@ class Combat(commands.Cog):
         c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
         return c
 
-    async def remove_temp_char(self, interaction, name, combat):
+    async def remove_temp_char(self, interaction, name, combat: combat_data.Combat):
         combat.temp_chars.remove(name)
         path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path_c)
-        current_c = campaigns.get_campain(campaigns.current_camp)
-        try:
-            current_c.remove_character(name)
-        except:
-            combat.temp_chars.remove(name)
-            print("Failed to remove")
-        campaigns.update_campaign(current_c)
-        JsonDataControl.save_update(path_c, campaigns)
+        server = await JsonDataControl.get_file(path_c)
+        del server[server.current_c][name]
+        JsonDataControl.save_update(path_c, server)
 
 
 async def setup(bot: Protocol):

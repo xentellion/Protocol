@@ -15,7 +15,13 @@ class Actor:
 
 class Combat:
     def __init__(
-        self, channel, message, round: int = 0, turn: int = 0, actors=[], temp_chars=[]
+        self,
+        channel,
+        message,
+        round: int = 0,
+        turn: int = 0,
+        actors: list = [],
+        temp_chars=[],
     ):
         self.channel = channel
         self.message = message
