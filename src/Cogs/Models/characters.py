@@ -4,10 +4,6 @@ from src.client import Protocol
 from src.data_control import *
 
 
-def set_value(old_value: int, new_value: str):
-    return old_value if new_value == "" else int(new_value)
-
-
 class StartForm(discord.ui.Modal):
     c_name = discord.ui.TextInput(
         style=discord.TextStyle.short,
@@ -140,14 +136,14 @@ class EditForm(discord.ui.Modal):
 
     def __init__(self, bot: Protocol, char: str):
         self.bot = bot
-        self.char = char
+        self.name = char
         super().__init__(title="Edit a character")
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
 
-        old_char = Character(server.campaigns[server.current_c][self.char])
+        old_char = Character(**server.campaigns[server.current_c][self.name])
 
         if old_char is None:
             await interaction.response.send_message(
@@ -155,21 +151,36 @@ class EditForm(discord.ui.Modal):
             )
             return
 
+        max_hp = set_value(old_char.max_hp, self.c_hp.value)
+        max_energy = set_value(old_char.max_energy, self.c_ep.value)
+        max_reaction = set_value(old_char.max_reaction, self.c_rp.value)
+        max_style = set_value(old_char.max_style, self.c_sp.value)
+
         new_char = Character(
             author=interaction.user.id,
-            hp=old_char.hp,
-            max_hp=set_value(old_char.max_hp, self.c_hp.value),
-            energy=old_char.energy,
-            max_energy=set_value(old_char.max_energy, self.c_ep.value),
-            reaction=old_char.reaction,
-            max_reaction=set_value(old_char.max_reaction, self.c_rp.value),
-            style=old_char.style,
-            max_style=set_value(old_char.max_style, self.c_sp.value),
+            hp=max(old_char.hp, old_char.max_hp, max_hp),
+            max_hp=max_hp,
+            energy=max(old_char.energy, old_char.max_energy, max_energy),
+            max_energy=max_energy,
+            reaction=max(old_char.reaction, old_char.max_reaction, max_reaction),
+            max_reaction=max_reaction,
+            style=max(old_char.style, old_char.max_style, max_style),
+            max_style=max_style,
         )
-
-        server.campaigns[server.current_c][self.char] = new_char
+        server.campaigns[server.current_c][self.name] = new_char
 
         JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Character `{self.char}` has been updated!", ephemeral=False
+            f"Character `{self.name}` has been updated!", ephemeral=False
         )
+
+
+def set_value(old_value: int, new_value: str):
+    return old_value if new_value == "" else int(new_value)
+
+
+def max(value: int, old_max: int, new_max: int):
+    if new_max > old_max:
+        return value + new_max - old_max
+    else:
+        return value if value <= new_max else new_max

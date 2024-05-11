@@ -24,6 +24,9 @@ class Character:
         self.style = style
         self.max_style = max_style
 
+    def __str__(self) -> str:
+        return json.dumps(self.__dict__, indent=4)
+
 
 class Campaign:
     def __init__(self, characters: dict[str, Character] = {}):
