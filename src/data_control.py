@@ -1,10 +1,10 @@
 import os
 import json
-import src.character_data as character_data
+from src.character_data import *
 
 
 class JsonDataControl:
-    async def get_file(path) -> character_data.DnDServer:
+    async def get_file(path) -> DnDServer:
         try:
             with open(path, "r") as file:
                 data = file.read().replace("\n", "")
@@ -12,20 +12,11 @@ class JsonDataControl:
             print("New DnD server!")
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "a+") as file:
-                file.write(character_data.DnDServer().toJSON())
+                file.write(DnDServer().toJSON())
                 data = file.read().replace("\n", "")
+        return DnDServer(**json.loads(data))
 
-        current_c = character_data.DnDServer(**json.loads(data))
-        current_c.campaigns = [
-            character_data.Campaign.fromdict(x) for x in current_c.campaigns
-        ]
-        for camp in current_c.campaigns:
-            camp.characters = [
-                character_data.Character.fromdict(x) for x in camp.characters
-            ]
-        return current_c
-
-    def save_update(path, data) -> None:
+    def save_update(path: str, data) -> None:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
             file.write(data.toJSON())

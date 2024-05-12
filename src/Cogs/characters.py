@@ -17,27 +17,24 @@ class Characters(commands.Cog):
         self.bot = bot
         self.choises = ["Energy", "Reaction points", "Style points"]
         self.rest = ["Short", "Long"]
+        self.path = "{0}Campaigns/{1}.json".format(self.bot.data_folder, "{0}")
         super().__init__()
 
     async def get_characters(
         self, interaction: discord.Interaction, char: str
     ) -> List[app_commands.Choice[str]]:
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        server = await JsonDataControl.get_file(path)
-        campaign = server.get_campain(server.current_c)
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        campaign = Campaign(server.campaigns[server.current_c])
         if campaign is None:
             return None
+
         if interaction.user.guild_permissions.administrator:
-            return [
-                app_commands.Choice(name=x.name, value=x.name)
-                for x in campaign.characters
-                if char.lower() in x.name.lower()
-            ]
+            return [app_commands.Choice(name=x[0], value=x[0]) for x in campaign]
         else:
             return [
-                app_commands.Choice(name=x.name, value=x.name)
-                for x in campaign.characters
-                if (char.lower() in x.name.lower() and x.author == interaction.user.id)
+                app_commands.Choice(name=x[0], value=x[0])
+                for x in campaign
+                if x[1].author == interaction.user.id
             ]
 
     async def resources_types(
@@ -59,16 +56,17 @@ class Characters(commands.Cog):
         ]
 
     @group.command(name="create", description="Create character for combat!")
+    # ->
     async def add_char(self, interaction: discord.Interaction):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        if campaigns.find_campain(campaigns.current_c):
+        camp = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if camp.current_c in camp.campaigns:
             await interaction.response.send_modal(StartForm(self.bot))
         else:
             await interaction.response.send_message("There is no active campaign!")
 
     @group.command(name="delete", description="Remove the unused character!")
     @app_commands.autocomplete(name=get_characters)
+    # ->
     async def remove_char(self, interaction: discord.Interaction, name: str):
         await interaction.response.send_message(
             f"## Are you sure you want to delete character {name}?",
@@ -78,73 +76,75 @@ class Characters(commands.Cog):
 
     @group.command(name="edit", description="Fix character errors!")
     @app_commands.autocomplete(name=get_characters)
+    # ->
     async def edit_char(self, interaction: discord.Interaction, name: str):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        if campaigns.find_campain(campaigns.current_c):
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c in server.campaigns:
             await interaction.response.send_modal(EditForm(self.bot, name))
         else:
             await interaction.response.send_message("There is no active campaign!")
 
     @group.command(name="status", description="Check character stats!")
     @app_commands.autocomplete(name=get_characters)
+    # ->
     async def show_char(self, interaction: discord.Interaction, name: str):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
-        embed = discord.Embed(
-            title=f"{character.name}",
-            colour=discord.Color.gold(),
-            description=f"""
-                Author - <@{character.author}>
+        character = Campaign(server.campaigns[server.current_c])[name]
 
-                **Health** ❤️       {character.hp}/{character.max_hp}
-                **Energy** ⚡       {character.energy}/{character.max_energy}
-                **Reaction** 👁️    {character.reaction}/{character.max_reaction}
-                **Style** ✨       {character.style}/{character.max_style}
-            """,
+        description = [
+            f"Author - <@{character.author}>\n",
+            f"**Health** ❤️ {character.hp}/{character.max_hp}",
+            f"**Energy** ⚡ {character.energy}/{character.max_energy}",
+        ]
+        if character.max_reaction > 0:
+            description.append(
+                f"**Reaction** 👁️ {character.reaction}/{character.max_reaction}"
+            )
+        if character.max_style > 0:
+            description.append(f"**Style** ✨ {character.style}/{character.max_style}")
+
+        embed = discord.Embed(
+            title=f"{name.capitalize()}",
+            colour=discord.Color.gold(),
+            description="\n".join(description),
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @group.command(name="damage", description="Register an attack on your character")
     @app_commands.autocomplete(name=get_characters)
+    # ->
     async def damage_char(
         self, interaction: discord.Interaction, name: str, damage: int
     ):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
+        character = Campaign(server.campaigns[server.current_c])[name]
 
-        character.hp -= damage
-        text = ""
+        character.hp -= abs(damage)
+        text = []
         warn = False
 
         if character.hp <= 0:
-            if character.hp + character.max_hp < int(character.max_hp / 2):
-                text += f"**⚠️ CRITICAL ⚠️**\n\n*{character.name}* is **DEAD**\n"
+            if character.hp + character.max_hp < character.max_hp // 2:
+                text.append(f"**⚠️ CRITICAL ⚠️**\n\n*{name}* is **DEAD**\n")
             else:
-                text += f"**⚠️ CRITICAL ⚠️**\n\n*{character.name}* is **IN COMA**\n"
+                text.append(f"**⚠️ CRITICAL ⚠️**\n\n*{name}* is **IN COMA**\n")
             character.hp = 0
             warn = True
+        text.append(f"**Health ❤️**: {character.hp}/{character.max_hp}")
 
-        text += f"**Health ❤️**: {character.hp}/{character.max_hp}"
+        server.campaigns[server.current_c][name] = character
+        JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
 
-        current.remove_character(name)
-        current.add_character(character)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
         await interaction.response.send_message(
             embed=discord.Embed(
                 title=f"{name} status",
-                description=text,
+                description="".join(text),
                 color=discord.Color.red() if warn else discord.Color.green(),
             ),
             ephemeral=not warn,
@@ -153,23 +153,19 @@ class Characters(commands.Cog):
     @group.command(name="heal", description="Heal your character!")
     @app_commands.autocomplete(name=get_characters)
     async def heal_char(self, interaction: discord.Interaction, name: str, heal: int):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
+        character = Campaign(server.campaigns[server.current_c])[name]
 
-        character.hp += heal
-
+        character.hp += abs(heal)
         if character.hp > character.max_hp:
             character.hp = character.max_hp
 
-        current.remove_character(name)
-        current.add_character(character)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server.campaigns[server.current_c][name] = character
+        JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
+
         await interaction.response.send_message(
             embed=discord.Embed(
                 title=f"{name} status",
@@ -184,44 +180,41 @@ class Characters(commands.Cog):
     async def spend_char(
         self, interaction: discord.Interaction, name: str, resource: str, value: int
     ):
-
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
+        character = Campaign(server.campaigns[server.current_c])[name]
         warn = True
 
         if resource == self.choises[0]:
-            if character.energy < value:
+            if character.energy < abs(value):
                 await interaction.response.send_message(
                     "You don't have enough energy for that action!", ephemeral=True
                 )
                 return
-            elif character.energy == value:
+            elif character.energy == abs(value):
                 character.energy = 0
                 await interaction.response.send_message(
                     "You have just spend all of your energy!", ephemeral=True
                 )
             else:
-                character.energy -= value
+                character.energy -= abs(value)
                 warn = False
 
         if resource == self.choises[1]:
-            if character.reaction < value:
+            if character.reaction < abs(value):
                 await interaction.response.send_message(
                     "You don't have enough reaction for that action!", ephemeral=True
                 )
                 return
-            elif character.reaction == value:
+            elif character.reaction == abs(value):
                 character.reaction = 0
                 await interaction.response.send_message(
                     "You have just spend all of your reaction!", ephemeral=True
                 )
             else:
-                character.reaction -= value
+                character.reaction -= abs(value)
                 warn = False
 
         if resource == self.choises[2]:
@@ -230,19 +223,17 @@ class Characters(commands.Cog):
                     "You don't have enough style for that action!", ephemeral=True
                 )
                 return
-            elif character.style == value:
+            elif character.style == abs(value):
                 character.style = 0
                 await interaction.response.send_message(
                     "You have just spend all of your style!", ephemeral=True
                 )
             else:
-                character.style -= value
+                character.style -= abs(value)
                 warn = False
 
-        current.remove_character(name)
-        current.add_character(character)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server.campaigns[server.current_c][name] = character
+        JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         if not warn:
             await interaction.response.send_message(
                 f"{value} {resource.lower()} has been spent! Call status to check it out",
@@ -256,14 +247,11 @@ class Characters(commands.Cog):
     async def restore_char(
         self, interaction: discord.Interaction, name: str, resource: str, value: int
     ):
-
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
+        character = Campaign(server.campaigns[server.current_c])[name]
         warn = True
 
         if resource == self.choises[0]:
@@ -273,39 +261,35 @@ class Characters(commands.Cog):
                 )
                 return
             else:
-                character.energy += value
+                character.energy += abs(value)
                 if character.energy > character.max_energy:
                     character.energy = character.max_energy
                 warn = False
-
-        if resource == self.choises[1]:
+        elif resource == self.choises[1]:
             if character.reaction == character.max_reaction:
                 await interaction.response.send_message(
                     "You don't have to restore reaction!", ephemeral=True
                 )
                 return
             else:
-                character.reaction += value
+                character.reaction += abs(value)
                 if character.reaction > character.max_reaction:
                     character.reaction = character.max_reaction
                 warn = False
-
-        if resource == self.choises[2]:
+        elif resource == self.choises[2]:
             if character.style == character.max_style:
                 await interaction.response.send_message(
                     "You don't have to restore style!", ephemeral=True
                 )
                 return
             else:
-                character.style += value
+                character.style += abs(value)
                 if character.style > character.max_style:
                     character.style = character.max_style
                 warn = False
 
-        current.remove_character(name)
-        current.add_character(character)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server.campaigns[server.current_c][name] = character
+        JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         if not warn:
             await interaction.response.send_message(
                 f"{value} {resource.lower()} has been restored! Call status to check it out",
@@ -318,13 +302,11 @@ class Characters(commands.Cog):
     )
     @app_commands.autocomplete(name=get_characters, rest=rest_types)
     async def rest_char(self, interaction: discord.Interaction, name: str, rest: str):
-        path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path)
-        current = campaigns.get_campain(campaigns.current_c)
-        if current is None:
+        server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        if server.current_c not in server.campaigns:
             await interaction.response.send_message("There is no active campaign!")
             return
-        character = current.get_character(name)
+        character = Campaign(server.campaigns[server.current_c])[name]
 
         if rest == self.rest[0]:
             character.hp += math.ceil(character.max_hp / 4)
@@ -341,10 +323,8 @@ class Characters(commands.Cog):
         character.reaction = character.max_reaction
         character.style = character.max_style
 
-        current.remove_character(name)
-        current.add_character(character)
-        campaigns.update_campaign(current)
-        JsonDataControl.save_update(path, campaigns)
+        server.campaigns[server.current_c][name] = character
+        JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         await interaction.response.send_message(
             f"{name} has rested and restored some energy and health!", ephemeral=True
         )

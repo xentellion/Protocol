@@ -47,9 +47,10 @@ class HelpView(discord.ui.View):
             self.add_item(button)
 
     def set_embed(self, data: dict):
-        key = next(iter(data))
-        text = ""
-        for item in data.get(key):
-            k = next(iter(item))
-            text += f"**{k}** - {item.get(k)}\n"
-        return discord.Embed(title=key, description=text, color=discord.Colour.gold())
+        title = next(iter(data))
+        text = [f"**{item}** - {data[title][item]}" for item in data[title]]
+        return discord.Embed(
+            title=title,
+            description="\n".join(text),
+            color=discord.Colour.gold(),
+        )

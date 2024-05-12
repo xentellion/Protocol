@@ -32,11 +32,17 @@ class Protocol(commands.Bot):
                 if self.config.token == "":
                     raise EmptyConfig(self.config_path)
             except JSONDecodeError:
-                json.dump(ConfigFile().__dict__, file, sort_keys=False, indent=4)
+                json.dump(
+                    ConfigFile().__dict__,
+                    file,
+                    sort_keys=False,
+                    indent=4,
+                    ensure_ascii=False,
+                )
                 raise EmptyConfig(self.config_path)
 
         with open(f"{data_folder}help.yml", "r", encoding="utf8") as file:
-            self.help = list(yaml.safe_load(file))
+            self.help: dict = yaml.safe_load(file)
         super().__init__(
             command_prefix=self.config.prefix, intents=intents, activity=activity
         )

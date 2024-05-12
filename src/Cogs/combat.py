@@ -16,15 +16,18 @@ class Combat(commands.Cog):
     def __init__(self, bot: Protocol):
         self.bot = bot
         self.directions = ["Up", "Down"]
+        self.path = "{0}Combat/{1}.json".format(self.bot.data_folder, {0})
         super().__init__()
 
     async def get_characters(
         self, interaction: discord.Interaction, char: str
     ) -> List[app_commands.Choice[str]]:
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
-        combat = await self.get_file_data(interaction, path)
+        combat = await self.get_file_data(
+            interaction, self.path.format(interaction.channel.id)
+        )
         if combat is None:
             return None
+
         return [
             app_commands.Choice(name=x.name, value=x.name)
             for x in combat.actors
@@ -41,22 +44,21 @@ class Combat(commands.Cog):
         ]
 
     @group.command(name="begin", description="Initiate combat queue")
+    # ->
     async def init_begin(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             "<:revolver:603601152885522465>", ephemeral=True
         )
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
-        try:
-            with open(path) as f:
-                await interaction.response.send_message(
-                    "There is already a combat in this channel!"
-                )
+        path = self.path.format(interaction.channel.id)
+        if os.path.exists(path):
+            await interaction.response.send_message(
+                "There is already a combat in this channel!"
+            )
             return
-        except FileNotFoundError:
-            print("New Combat Session")
-        text = "```md\nCurrent initiative: 0 (round 0)\n"
-        text += "=" * (len(text) - 7) + "\n```"
-        message = await interaction.channel.send(text)
+        print("New Combat Session")
+        message = await interaction.channel.send(
+            "\n".join(self.combat_header() + ["```"])
+        )
         await message.pin()
         await interaction.channel.send(
             """**Справка:**
@@ -66,13 +68,15 @@ class Combat(commands.Cog):
                 `/init remove` - Leave combat
                 `/init end` - Finish combat"""
         )
-        new_combat = combat_data.Combat(interaction.channel.id, message.id)
-        JsonDataControl.save_update(path, new_combat)
+        JsonDataControl.save_update(
+            path, combat_data.Combat(interaction.channel.id, message.id)
+        )
 
     @group.command(name="end", description="Finish the combat")
     @app_commands.checks.has_permissions(administrator=True)
+    # ->
     async def init_end(self, interaction: discord.Interaction):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         for temp in combat.temp_chars:
             await self.remove_temp_char(interaction, temp, combat)
@@ -98,17 +102,17 @@ class Combat(commands.Cog):
         if len(name) < 3:
             await interaction.response.send_message("Name too short", ephemeral=True)
             return
-        if hp is not None and en is not None:
+        if not (hp is None or en is None):
             if not (hp.isdigit() and en.isdigit()):
                 await interaction.response.send_message(
                     "Stats are not a number!", ephemeral=True
                 )
                 return
 
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = self.path.format(interaction.channel_id)
         combat = await self.get_file_data(interaction, path)
 
-        if any(x for x in combat.actors if x.name == name):
+        if combat.check_actor(name):
             await interaction.response.send_message(
                 "There is already a character with that name", ephemeral=True
             )
@@ -123,13 +127,11 @@ class Combat(commands.Cog):
             combat.turn += 1
 
         # add temporary character
-        if hp is not None and en is not None:
+        if not (hp is None and en is None):
             path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-            campaigns = await JsonDataControl.get_file(path_c)
-            current = campaigns.get_campain(campaigns.current_c)
-            if current is not None:
-                new_char = character_data.Character(
-                    name=name,
+            server = await JsonDataControl.get_file(path_c)
+            if server.campaigns[server.current_c] is not None:
+                new_char = Character(
                     author=interaction.user.id,
                     hp=int(hp),
                     max_hp=int(hp),
@@ -140,9 +142,8 @@ class Combat(commands.Cog):
                     style=0,
                     max_style=0,
                 )
-                current.add_character(new_char)
-                campaigns.update_campaign(current)
-                JsonDataControl.save_update(path_c, campaigns)
+                server.campaigns[server.current_c][name] = new_char
+                JsonDataControl.save_update(path_c, server)
                 combat.temp_chars.append(name)
 
         JsonDataControl.save_update(path, combat)
@@ -154,8 +155,9 @@ class Combat(commands.Cog):
 
     @group.command(name="remove", description="Leave the combat")
     @app_commands.autocomplete(name=get_characters)
+    # ->
     async def remove(self, interaction: discord.Interaction, name: str):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
         if actor.name == name:
@@ -182,8 +184,9 @@ class Combat(commands.Cog):
         )
 
     @group.command(name="next", description="Progress the queue")
+    # ->
     async def remove(self, interaction: discord.Interaction):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
         if (
@@ -210,7 +213,7 @@ class Combat(commands.Cog):
         direction: str,
         shift: str = None,
     ):
-        path = f"{self.bot.data_folder}{interaction.channel.id}.json"
+        path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_actor(name)
         index = combat.actors.index(actor)
@@ -282,14 +285,14 @@ class Combat(commands.Cog):
 
     async def update_message(self, interaction, combat: combat_data.Combat):
         msg = await interaction.channel.fetch_message(combat.message)
-        text = f"```md\nCurrent initiative: {combat.actors[combat.turn].initiative} (round {combat.round})\n"
-        text += "=" * (len(text) - 7) + "\n"
+        text = self.combat_header(combat.actors[combat.turn].initiative, combat.round)
         for i in range(len(combat.actors)):
-            text += "# " if i == combat.turn and combat.round > 0 else "  "
             actor = combat.actors[i]
-            text += f"{actor.initiative}: {actor.name}\n"
-        text += "```"
-        await msg.edit(content=text)
+            text.append(
+                f"{'# ' if i == combat.turn and combat.round > 0 else '  '}{actor.initiative}: {actor.name}"
+            )
+        text.append("```")
+        await msg.edit(content="\n".join(text))
 
     async def get_file_data(
         self, interaction: discord.Interaction, path
@@ -303,21 +306,20 @@ class Combat(commands.Cog):
             )
             return
         c = combat_data.Combat(**json.loads(data))
-        c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
+        # c.actors = [combat_data.Actor.fromdict(x) for x in c.actors]
+        c.actors = [combat_data.Actor(**x) for x in c.actors]
         return c
 
-    async def remove_temp_char(self, interaction, name, combat):
+    def combat_header(self, initiative: int = 0, round: int = 0):
+        head = f"```md\nCurrent initiative: {initiative} (round {round})"
+        return [head, "=" * (len(head) - 7)]
+
+    async def remove_temp_char(self, interaction, name, combat: combat_data.Combat):
         combat.temp_chars.remove(name)
         path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-        campaigns = await JsonDataControl.get_file(path_c)
-        current_c = campaigns.get_campain(campaigns.current_c)
-        try:
-            current_c.remove_character(name)
-        except:
-            combat.temp_chars.remove(name)
-            print("Failed to remove")
-        campaigns.update_campaign(current_c)
-        JsonDataControl.save_update(path_c, campaigns)
+        server = await JsonDataControl.get_file(path_c)
+        del server.campaigns[server.current_c][name]
+        JsonDataControl.save_update(path_c, server)
 
 
 async def setup(bot: Protocol):
