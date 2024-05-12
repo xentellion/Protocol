@@ -16,7 +16,7 @@ class JsonDataControl:
                 data = file.read().replace("\n", "")
         return DnDServer(**json.loads(data))
 
-    def save_update(path: str, data: DnDServer) -> None:
+    def save_update(path: str, data) -> None:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as file:
             file.write(data.toJSON())

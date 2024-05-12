@@ -2,15 +2,13 @@ import json
 
 
 class Actor:
-    @classmethod
-    def fromdict(cls, d):
-        df = {k: v for k, v in d.items()}
-        return cls(**df)
-
     def __init__(self, name: str, author, initiative: int):
         self.name = name
         self.author = author
         self.initiative = initiative
+
+    def __str__(self) -> str:
+        return json.dumps(self.__dict__, indent=4)
 
 
 class Combat:
@@ -20,8 +18,8 @@ class Combat:
         message,
         round: int = 0,
         turn: int = 0,
-        actors: list = [],
-        temp_chars=[],
+        actors: list[Actor] = [],
+        temp_chars: list[str] = [],
     ):
         self.channel = channel
         self.message = message
@@ -37,6 +35,15 @@ class Combat:
     def remove_actors(self, actor: str):
         self.actors.remove(next((x for x in self.actors if x.name == actor), None))
 
+    def check_actor(self, actor: str) -> bool:
+        return any((x for x in self.actors if x.name == actor))
+
+    def get_current(self) -> Actor:
+        return self.actors[self.turn]
+
+    def get_actor(self, name) -> Actor:
+        return next((x for x in self.actors if x.name == name), None)
+
     def next_turn(self):
         if self.round == 0:
             self.round = 1
@@ -47,11 +54,14 @@ class Combat:
                 self.round += 1
                 self.turn = 0
 
-    def get_current(self) -> Actor:
-        return self.actors[self.turn]
-
-    def get_actor(self, name) -> Actor:
-        return next((x for x in self.actors if x.name == name), None)
+    def __str__(self) -> str:
+        return self.toJSON()
 
     def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, sort_keys=True, indent=4)
+        return json.dumps(
+            self,
+            default=lambda o: o.__dict__,
+            sort_keys=True,
+            indent=4,
+            ensure_ascii=False,
+        )
