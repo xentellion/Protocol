@@ -1,7 +1,7 @@
 import discord
-from src.character_data import Character
+from src.character_data import Character, Characteristic
 from src.client import Protocol
-from src.data_control import *
+from src.data_control import JsonDataControl
 
 
 class StartForm(discord.ui.Modal):
@@ -12,36 +12,9 @@ class StartForm(discord.ui.Modal):
         required=True,
     )
 
-    c_hp = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=True,
-        label="Set Character Health",
-        placeholder="10",
-    )
-
-    c_ep = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=True,
-        label="Set Character Energy",
-        placeholder="10",
-    )
-
-    c_rp = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=True,
-        label="Set Character Reaction Points",
-        placeholder="0",
-    )
-
-    c_sp = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=True,
-        label="Set Character Style Points",
-        placeholder="0",
-    )
-
-    def __init__(self, bot: Protocol):
+    def __init__(self, bot: Protocol, stats: dict[str, Characteristic]):
         self.bot = bot
+        self.stats = stats
         super().__init__(title="Register a character")
 
     async def on_submit(self, interaction: discord.Interaction):
@@ -56,21 +29,14 @@ class StartForm(discord.ui.Modal):
 
         new_char = Character(
             author=interaction.user.id,
-            hp=int(self.c_hp.value),
-            max_hp=int(self.c_hp.value),
-            energy=int(self.c_ep.value),
-            max_energy=int(self.c_ep.value),
-            reaction=int(self.c_rp.value),
-            max_reaction=int(self.c_rp.value),
-            style=int(self.c_sp.value),
-            max_style=int(self.c_sp.value),
         )
+        new_char.stats = self.stats.copy()
 
-        server.campaigns[server.current_c][self.c_name.value] = new_char
+        server.campaigns[server.current_c].characters[self.c_name.value] = new_char
 
         JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Character `{self.c_name.value}` has been created!", ephemeral=False
+            f"Персонаж `{self.c_name.value}` создан! Не забудьте задать характеристики.", ephemeral=False
         )
 
 
@@ -105,70 +71,32 @@ class DeleteConfirm(discord.ui.View):
 
 
 class EditForm(discord.ui.Modal):
-
-    c_hp = discord.ui.TextInput(
+    c_stat = discord.ui.TextInput(
         style=discord.TextStyle.short,
-        required=False,
-        label="Edit Character Max Health",
-        placeholder="10",
-    )
-
-    c_ep = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=False,
-        label="Edit Character Max Energy",
-        placeholder="10",
-    )
-
-    c_rp = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=False,
-        label="Edit Character Reaction Points",
+        label="Новое значение",
         placeholder="0",
+        required=True,
     )
 
-    c_sp = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=False,
-        label="Edit Character Style Points",
-        placeholder="0",
-    )
-
-    def __init__(self, bot: Protocol, char: str):
+    def __init__(self, bot: Protocol, name: str, char: Character, stat: str):
         self.bot = bot
-        self.name = char
-        super().__init__(title="Edit a character")
+        self.name = name
+        self.char = char
+        self.stat = stat
+        super().__init__(title=f"Изменение: {stat.capitalize()}")
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
 
-        old_char = Character(**server.campaigns[server.current_c][self.name])
-
-        if old_char is None:
+        try:
+            self.char.stats[self.stat].value = int(self.c_stat.value)
+            self.char.stats[self.stat].max_value = int(self.c_stat.value)
+        except ValueError:
             await interaction.response.send_message(
-                "There is no character with that name!"
+                "Only numbers in stat values!"
             )
-            return
-
-        max_hp = set_value(old_char.max_hp, self.c_hp.value)
-        max_energy = set_value(old_char.max_energy, self.c_ep.value)
-        max_reaction = set_value(old_char.max_reaction, self.c_rp.value)
-        max_style = set_value(old_char.max_style, self.c_sp.value)
-
-        new_char = Character(
-            author=interaction.user.id,
-            hp=max(old_char.hp, old_char.max_hp, max_hp),
-            max_hp=max_hp,
-            energy=max(old_char.energy, old_char.max_energy, max_energy),
-            max_energy=max_energy,
-            reaction=max(old_char.reaction, old_char.max_reaction, max_reaction),
-            max_reaction=max_reaction,
-            style=max(old_char.style, old_char.max_style, max_style),
-            max_style=max_style,
-        )
-        server.campaigns[server.current_c][self.name] = new_char
-
+        server.campaigns[server.current_c].characters[self.name] = self.char
         JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
             f"Character `{self.name}` has been updated!", ephemeral=False

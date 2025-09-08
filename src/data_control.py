@@ -1,6 +1,6 @@
 import os
 import json
-from src.character_data import *
+from src.character_data import DnDServer
 
 
 class JsonDataControl:

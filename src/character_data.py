@@ -1,36 +1,29 @@
 import json
 
 
+class Characteristic:
+    def __init__(self, value: int = -1, max_value: int = -1, has_max: bool = False):
+        self.value = value
+        self.max_value = max_value
+        self.has_max = has_max
+
+    def __str__(self) -> str:
+        return json.dumps(self.__dict__, indent=4)
+
+
 class Character:
-    def __init__(
-        self,
-        author: int,
-        hp: int = 10,
-        max_hp: int = 10,
-        energy: int = 2,
-        max_energy: int = 2,
-        reaction: int = 0,
-        max_reaction: int = 0,
-        style: int = 0,
-        max_style: int = 0,
-    ):
+    def __init__(self, author: int, stats: dict[str, Characteristic] = {}):
         self.author = author
-        self.hp = hp
-        self.max_hp = max_hp
-        self.energy = energy
-        self.max_energy = max_energy
-        self.reaction = reaction
-        self.max_reaction = max_reaction
-        self.style = style
-        self.max_style = max_style
+        self.stats = {k: Characteristic(**v) for k, v in stats.items()}
 
     def __str__(self) -> str:
         return json.dumps(self.__dict__, indent=4)
 
 
 class Campaign:
-    def __init__(self, characters: dict[str, Character] = {}):
-        self.characters = characters
+    def __init__(self, stats: dict[str, Characteristic] = {}, characters: dict[str, Character] = {}):
+        self.characters = {k: Character(**v) for k, v in characters.items()}
+        self.stats = {k: Characteristic(**v) for k, v in stats.items()}
 
     def __len__(self):
         return len(self.characters.keys())
@@ -39,7 +32,7 @@ class Campaign:
         self.characters[key] = value
 
     def __getitem__(self, key):
-        return Character(**self.characters[key])
+        return self.characters[key]
 
     def __delitem__(self, key):
         self.characters.pop(key)
@@ -52,13 +45,13 @@ class Campaign:
             yield (v, self.__getitem__(v))
 
     def __str__(self) -> str:
-        return json.dumps(self.characters, default=lambda o: o.__dict__, indent=4)
+        return json.dumps(self, default=lambda o: o.__dict__, indent=4)
 
 
 class DnDServer:
     def __init__(self, current_c: str = "", campaigns: dict[str, Campaign] = {}):
         self.current_c = current_c
-        self.campaigns = campaigns
+        self.campaigns = {k: Campaign(**v) for k, v in campaigns.items()}
 
     def __str__(self) -> str:
         return self.toJSON()

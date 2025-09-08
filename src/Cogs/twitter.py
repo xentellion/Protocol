@@ -5,7 +5,7 @@ from typing import List
 from src.client import Protocol
 from discord import app_commands
 from discord.ext import commands
-from .Models.twitter import *
+from .Models.twitter import DeleteConfirm, TopicStarter, Form, Message
 
 
 class Twitter(commands.Cog):

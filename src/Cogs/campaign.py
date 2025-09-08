@@ -1,7 +1,8 @@
+import json
 import discord
 from src.client import Protocol
-from .Models.campaign import DeleteConfirm
-from src.data_control import *
+from .Models.campaign import DeleteConfirm, CreateCampaign
+from src.data_control import JsonDataControl
 from src.character_data import DnDServer
 from discord import app_commands
 from discord.ext import commands
@@ -35,23 +36,13 @@ class Campaign(commands.Cog):
 
     # CAMPAIGN START
     @group.command(name="start", description="Start new Campaign for new characters!")
-    # @app_commands.checks.has_permissions(administrator=True)
-    #  ->
-    async def campaign_start(self, interaction: discord.Interaction, name: str):
+    @app_commands.checks.has_permissions(administrator=True)
+    async def campaign_start(self, interaction: discord.Interaction):
         camp = await self.get_camp_data(interaction)
         if camp is None:
             return
-
-        if name in camp.campaigns:
-            await interaction.response.send_message(
-                "There is already a campaign with that name!"
-            )
-            return
-        camp.campaigns[name] = {}
-        camp.current_c = name
-        JsonDataControl.save_update(self.path.format(interaction.guild.id), camp)
-        await interaction.response.send_message(
-            f"## Campaign `{name}` has been created and is set as active!"
+        await interaction.response.send_modal(
+            CreateCampaign(self.bot, camp)
         )
 
     # CAMPAIGN DELETE
@@ -76,6 +67,7 @@ class Campaign(commands.Cog):
         camp = await self.get_camp_data(interaction)
         if camp is None:
             return
+        print(camp)
         text = "\n".join(
             f"{'# ' if i == camp.current_c else '  '}{i}" for i in camp.campaigns.keys()
         )
