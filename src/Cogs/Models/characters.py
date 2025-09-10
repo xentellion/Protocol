@@ -5,25 +5,27 @@ from src.data_control import JsonDataControl
 
 
 class StartForm(discord.ui.Modal):
-    c_name = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        label="Set Character Name",
-        placeholder="Name",
-        required=True,
-    )
-
-    def __init__(self, bot: Protocol, stats: dict[str, Characteristic]):
+    def __init__(self, bot: Protocol, locale: str, stats: dict[str, Characteristic]):
         self.bot = bot
         self.stats = stats
-        super().__init__(title="Register a character")
+        _ = self.bot.locale(locale)
+        self.c_name = discord.ui.TextInput(
+            style=discord.TextStyle.short,
+            label=_("Set Character Name"),
+            placeholder=_("Name"),
+            required=True,
+        )
+        super().__init__(title=_("Register a character"))
+        self.add_item(self.c_name)
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
+        _ = self.bot.locale(interaction.locale)
 
         if self.c_name.value in server.campaigns[server.current_c]:
             await interaction.response.send_message(
-                "There is already a character with that name!"
+                _("There is already a character with that name!")
             )
             return
 
@@ -36,30 +38,33 @@ class StartForm(discord.ui.Modal):
 
         JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Персонаж `{self.c_name.value}` создан! Не забудьте задать характеристики.", ephemeral=False
+            _("Character `{0}` is created! Don't forget to set up their charateristics").format(self.c_name.value),
+            ephemeral=False,
         )
 
 
 class DeleteConfirm(discord.ui.View):
-    def __init__(self, bot: Protocol, char: str) -> None:
+    def __init__(self, bot: Protocol, locale: str, char: str) -> None:
         super().__init__(timeout=15)
         self.bot = bot
         self.char = char
-        self.titles = ["YES", "NO"]
+        _ = self.bot.locale(locale)
+        self.titles = [_("YES"), _("NO")]
         self.add_buttons()
 
     async def page_yes(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
         del server.campaigns[server.current_c][self.char]
-
+        _ = self.bot.locale(interaction.locale)
         JsonDataControl.save_update(path, server)
         await interaction.response.edit_message(
-            content="## Character Deleted", view=None
+            content=_("## Character Deleted"), view=None
         )
 
     async def page_no(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Deletion cancelled", view=None)
+        _ = self.bot.locale(interaction.locale)
+        await interaction.response.edit_message(content=_("Cancelled"), view=None)
 
     def add_buttons(self):
         colors = [discord.ButtonStyle.red, discord.ButtonStyle.green]
@@ -71,35 +76,36 @@ class DeleteConfirm(discord.ui.View):
 
 
 class EditForm(discord.ui.Modal):
-    c_stat = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        label="Новое значение",
-        placeholder="0",
-        required=True,
-    )
-
-    def __init__(self, bot: Protocol, name: str, char: Character, stat: str):
+    def __init__(self, bot: Protocol, locale: str, name: str, char: Character, stat: str):
         self.bot = bot
         self.name = name
         self.char = char
         self.stat = stat
-        super().__init__(title=f"Изменение: {stat.capitalize()}")
+        _ = self.bot.locale(locale)
+        super().__init__(title=f"{_('Changing')}: {stat.capitalize()}")
+        self.c_stat = discord.ui.TextInput(
+            style=discord.TextStyle.short,
+            label=_("New value"),
+            placeholder="0",
+            required=True,
+        )
+        self.add_item(self.c_stat)
 
     async def on_submit(self, interaction: discord.Interaction):
         path = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
         server = await JsonDataControl.get_file(path)
-
+        _ = self.bot.locale(interaction.locale)
         try:
             self.char.stats[self.stat].value = int(self.c_stat.value)
             self.char.stats[self.stat].max_value = int(self.c_stat.value)
         except ValueError:
             await interaction.response.send_message(
-                "Only numbers in stat values!"
+                _("Only numbers in stat values!")
             )
         server.campaigns[server.current_c].characters[self.name] = self.char
         JsonDataControl.save_update(path, server)
         await interaction.response.send_message(
-            f"Character `{self.name}` has been updated!", ephemeral=False
+            _("Character `{0}` has been updated!").format(self.name), ephemeral=False
         )
 
 

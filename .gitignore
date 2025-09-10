@@ -2,6 +2,7 @@
 /Data/*
 !.gitkeep
 !help.yml
+!locales/
 /.vscode
 
 # Byte-compiled / optimized / DLL files

@@ -49,10 +49,12 @@ class Misc(commands.Cog):
         try:
             _time = int(_time)
         except ValueError:
-            await ctx.send("Command must be in format `!techo <0-600> text`")
+            _ = self.bot.locale(ctx.guild.preferred_locale)
+            await ctx.send(_("Command must be in format `!techo <0-600> text`"))
             return
         if _time > 600 or _time < 0:
-            await ctx.send("Time can be set anly between 0 and 600 seconds")
+            _ = self.bot.locale(ctx.guild.preferred_locale)
+            await ctx.send(_("Time can only be set between 0 and 600 seconds"))
             return
         await ctx.message.delete()
         webhook = await ctx.channel.create_webhook(name="The Protocol")
@@ -68,12 +70,12 @@ class Misc(commands.Cog):
 
     @commands.command()
     async def protocol(self, ctx):
+        _ = self.bot.locale(ctx.guild.preferred_locale)
         embed = discord.Embed(
-            title="**ПРОТОКОЛ ИНИЦИИРОВАН**", color=discord.Color.gold()
+            title=_("**PROTOCOL IS INITIALIZED**"),
+            color=discord.Color.gold(),
         )
-        embed.set_image(
-            url="https://cdn.discordapp.com/attachments/1133840435014545488/1133849046281363486/protocol.png"
-        )
+        embed.set_image(url=Enums.protocol)
         await ctx.send(embed=embed)
 
     @commands.command(name="sync")

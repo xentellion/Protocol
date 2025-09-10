@@ -1,6 +1,7 @@
 import os
 import yaml
 import json
+import gettext
 import discord
 from json import JSONDecodeError
 from discord.ext import commands
@@ -41,12 +42,35 @@ class Protocol(commands.Bot):
                 )
                 raise EmptyConfig(self.config_path)
 
+        self.__locales = {}
+        for entry in next(os.walk(self.data_folder + "locales"))[1]:
+            self.__locales[entry] = gettext.translation(
+                "protocol",
+                localedir=f"{self.data_folder}locales",
+                languages=[entry]
+            )
+        for loca in self.__locales.values():
+            loca.install()
+
         with open(f"{data_folder}help.yml", "r", encoding="utf8") as file:
             self.help: dict = yaml.safe_load(file)
         super().__init__(
             command_prefix=self.config.prefix, intents=intents, activity=activity
         )
         self.characters = None
+
+    def locale(self, locale: str):
+        res = None
+        match locale:
+            case "american_english":
+                res = "en"
+            case "british_english":
+                res = "en"
+            case "russian":
+                res = "ru"
+            case _:
+                res = "en"
+        return self.__locales[res].gettext
 
     async def setup_hook(self):
         await self.tree.sync(guild=discord.Object(id=557589422372028416))

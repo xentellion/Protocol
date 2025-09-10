@@ -6,28 +6,30 @@ from src.enums import Enums
 
 
 class Form(discord.ui.Modal):
-    login = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        label="Задайте имя персонажа",
-        placeholder="SampleLogin",
-        required=True,
-        min_length=3,
-        max_length=64,
-    )
-
-    avatar = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        required=False,
-        label="Вставьте ссылку на аватарку вашего персонажа",
-        placeholder="Link MUST have file format: .jpeg, .png, etc.",
-    )
-
-    def __init__(self, bot: Protocol):
+    def __init__(self, bot: Protocol, locale: str):
         self.bot = bot
-        super().__init__(title="Зарегистрировать персонажа")
+        _ = self.bot.locale(locale)
+        super().__init__(title=_("Register your character!"))
+        self.login = discord.ui.TextInput(
+            style=discord.TextStyle.short,
+            label=_("Set character name"),
+            placeholder=_("Name"),
+            required=True,
+            min_length=3,
+            max_length=64,
+        )
+        self.avatar = discord.ui.TextInput(
+            style=discord.TextStyle.short,
+            required=False,
+            label=_("Insert link on character avatar"),
+            placeholder=_("Link MUST end with file format: .jpeg, .png"),
+        )
+        self.add_item(self.login)
+        self.add_item(self.avatar)
 
     async def on_submit(self, interaction: discord.Interaction):
-        embed = discord.Embed(title=f"**{self.login}** присоединился к сети!")
+        _ = self.bot.locale(interaction.locale)
+        embed = discord.Embed(title=f"**{self.login}** {_('joined the network!')}")
         embed.set_author(name=interaction.user, icon_url=interaction.user.avatar.url)
         avatar = self.avatar if self.avatar.value != "" else Enums.default_image
         embed.set_thumbnail(url=avatar)
@@ -44,19 +46,20 @@ class Form(discord.ui.Modal):
 
 
 class Message(discord.ui.Modal):
-    login = discord.ui.TextInput(
-        style=discord.TextStyle.long,
-        label="Введите сообщение",
-        placeholder="Ваше сообщение",
-        required=True,
-        max_length=2000,
-    )
-
-    def __init__(self, bot: Protocol, char, image_url: str = None):
+    def __init__(self, bot: Protocol, locale: str, char, image_url: str = None):
         self.bot = bot
-        super().__init__(title="Напишите сообщение")
+        _ = self.bot.locale(locale)
+        super().__init__(title=_("Write the message"))
         self.character = char
         self.url = image_url
+        self.login = discord.ui.TextInput(
+            style=discord.TextStyle.long,
+            label=_("Enter your message"),
+            placeholder=_("Message"),
+            required=True,
+            max_length=2000,
+        )
+        self.add_item(self.login)
 
     async def on_submit(
         self,
@@ -110,34 +113,35 @@ class Message(discord.ui.Modal):
                 )
 
         await webhook.delete()
+        _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
-            "Сообщение отправлено ✅", ephemeral=True
+            f"{_('Message sent!')} ✅", ephemeral=True
         )
 
 
 class TopicStarter(discord.ui.Modal):
-    topic_title = discord.ui.TextInput(
-        style=discord.TextStyle.short,
-        label="Введите заголовок ветки",
-        placeholder="Заголовок",
-        required=True,
-        max_length=500,
-    )
-
-    topic_text = discord.ui.TextInput(
-        style=discord.TextStyle.long,
-        label="Введите сообщение",
-        placeholder="Ваше сообщение",
-        required=True,
-        max_length=2000,
-    )
-
-    def __init__(self, bot: Protocol, char, tag, image_url):
+    def __init__(self, bot: Protocol, char, tag, image_url: str):
         self.bot = bot
-        super().__init__(title="Начните обсуждение в форуме")
+        super().__init__(title="Start topic discussion!")
         self.character = char
         self.tag = tag
         self.url = image_url
+        self.topic_title = discord.ui.TextInput(
+            style=discord.TextStyle.short,
+            label="Write topic title",
+            placeholder="Title",
+            required=True,
+            max_length=500,
+        )
+        self.topic_text = discord.ui.TextInput(
+            style=discord.TextStyle.long,
+            label="Enter your message",
+            placeholder="Message body",
+            required=True,
+            max_length=2000,
+        )
+        self.add_item(self.topic_title)
+        self.add_item(self.topic_text)
 
     async def on_submit(self, interaction: discord.Interaction):
         df = self.bot.characters
@@ -177,17 +181,19 @@ class TopicStarter(discord.ui.Modal):
             await topic.add_tags(tag)
 
         await webhook.delete()
+        _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
-            "Сообщение отправлено ✅", ephemeral=True
+            f"{_('Message sent!')} ✅", ephemeral=True
         )
 
 
 class DeleteConfirm(discord.ui.View):
-    def __init__(self, bot: Protocol, character) -> None:
+    def __init__(self, bot: Protocol, locale: str, character) -> None:
         super().__init__(timeout=10)
         self.bot = bot
         self.char = character
-        self.titles = ["ДА", "НЕТ"]
+        _ = self.bot.locale(locale)
+        self.titles = [_("YES"), _("NO")]
         self.add_buttons()
 
     async def page_yes(self, interaction: discord.Interaction):
@@ -196,10 +202,12 @@ class DeleteConfirm(discord.ui.View):
         path = self.bot.data_folder + "characters.csv"
         self.bot.characters.to_csv(path)
         self.bot.characters = pd.read_csv(path, index_col=0)
-        await interaction.response.edit_message(content="Персонаж удален", view=None)
+        _ = self.bot.locale(interaction.locale)
+        await interaction.response.edit_message(content=_("Character deleted"), view=None)
 
     async def page_no(self, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Отмена удаления", view=None)
+        _ = self.bot.locale(interaction.locale)
+        await interaction.response.edit_message(content=_("Cancelled"), view=None)
 
     def add_buttons(self):
         colors = [discord.ButtonStyle.red, discord.ButtonStyle.green]

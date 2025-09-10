@@ -53,17 +53,19 @@ class Characters(commands.Cog):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
         if server.current_c in server.campaigns:
             campaign = server.campaigns[server.current_c]
-            await interaction.response.send_modal(StartForm(self.bot, campaign.stats))
+            await interaction.response.send_modal(StartForm(self.bot, interaction.locale, campaign.stats))
 
         else:
-            await interaction.response.send_message("There is no active campaign!")
+            _ = self.bot.locale(interaction.locale)
+            await interaction.response.send_message(_("There is no active campaign!"))
 
     @group.command(name="delete", description="Remove the unused character!")
     @app_commands.autocomplete(name=get_characters)
     async def remove_char(self, interaction: discord.Interaction, name: str):
+        _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
-            f"## Are you sure you want to delete character {name}?",
-            view=DeleteConfirm(self.bot, name),
+            _("## Are you sure you want to delete character {0}?").format(name),
+            view=DeleteConfirm(self.bot, interaction.locale, name),
             ephemeral=True,
         )
 
@@ -73,25 +75,27 @@ class Characters(commands.Cog):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
         if server.current_c in server.campaigns:
             char = server.campaigns[server.current_c].characters[name]
-            await interaction.response.send_modal(EditForm(self.bot, name, char, stat))
+            await interaction.response.send_modal(EditForm(self.bot, interaction.locale, name, char, stat))
         else:
-            await interaction.response.send_message("There is no active campaign!")
+            _ = self.bot.locale(interaction.locale)
+            await interaction.response.send_message(_("There is no active campaign!"))
 
     @group.command(name="status", description="Check character stats!")
     @app_commands.autocomplete(name=get_characters)
     # ->
     async def show_char(self, interaction: discord.Interaction, name: str):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        _ = self.bot.locale(interaction.locale)
         if server.current_c not in server.campaigns:
-            await interaction.response.send_message("There is no active campaign!")
+            await interaction.response.send_message(_("There is no active campaign!"))
             return
         character = server.campaigns[server.current_c].characters[name]
-        description = [f"Author - <@{character.author}>\n"]
+        description = [_("Author - <@{0}>\n").format(character.author)]
         for k, stat in character.stats.items():
             if stat.has_max:
-                text = f"**{k}:**\t{stat.value}/{stat.max_value}"
+                text = _("**{0}:**\t{1}/{2}").format(k, stat.value, stat.max_value)
             else:
-                text = f"**{k}:**\t{stat.value}"
+                text = _("**{0}:**\t{1}").format(k, stat.value)
             description.append(text)
 
         embed = discord.Embed(
@@ -107,15 +111,16 @@ class Characters(commands.Cog):
         self, interaction: discord.Interaction, name: str, resource: str, value: int
     ):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        _ = self.bot.locale(interaction.locale)
         if server.current_c not in server.campaigns:
-            await interaction.response.send_message("There is no active campaign!")
+            await interaction.response.send_message(_("There is no active campaign!"))
             return
         character = server.campaigns[server.current_c].characters[name]
 
         character.stats[resource].value -= value
         if character.stats[resource].value < 0:
             await interaction.response.send_message(
-                f"Недостаточно {resource}! У вас не хватает {character.stats[resource].value * -1}!",
+                _("Not enough {0}! You dont have {1}!").format(resource.lower(), character.stats[resource].value * -1),
                 ephemeral=False,
             )
             return
@@ -123,7 +128,7 @@ class Characters(commands.Cog):
         server.campaigns[server.current_c].characters[name] = character
         JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         await interaction.response.send_message(
-            f"{value} {resource.lower()} потрачены! у вас теперь {character.stats[resource].value} {resource}",
+            _("{0} {1} have been spent! {3} now has {2} {1}").format(value, resource.lower(), character.stats[resource].value, name),
             ephemeral=False,
         )
 
@@ -135,8 +140,9 @@ class Characters(commands.Cog):
         self, interaction: discord.Interaction, name: str, resource: str, value: int
     ):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        _ = self.bot.locale(interaction.locale)
         if server.current_c not in server.campaigns:
-            await interaction.response.send_message("There is no active campaign!")
+            await interaction.response.send_message(_("There is no active campaign!"))
             return
         character = server.campaigns[server.current_c].characters[name]
 
@@ -148,7 +154,7 @@ class Characters(commands.Cog):
         server.campaigns[server.current_c].characters[name] = character
         JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         await interaction.response.send_message(
-            f"{value} {resource.lower()} получены! У вас теперь {character.stats[resource].value} {resource}",
+            _("{3} has recieved {0} {1}! They have {2} {1}").format(value, resource.lower(), character.stats[resource].value, name),
             ephemeral=False,
         )
 
@@ -159,8 +165,9 @@ class Characters(commands.Cog):
     @app_commands.autocomplete(name=get_characters)
     async def rest_char(self, interaction: discord.Interaction, name: str):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
+        _ = self.bot.locale(interaction.locale)
         if server.current_c not in server.campaigns:
-            await interaction.response.send_message("There is no active campaign!")
+            await interaction.response.send_message(_("There is no active campaign!"))
             return
         character = server.campaigns[server.current_c].characters[name]
         for k, stat in character.stats.items():
@@ -172,7 +179,7 @@ class Characters(commands.Cog):
         server.campaigns[server.current_c].characters[name] = character
         JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         await interaction.response.send_message(
-            f"{name} удалось отдохнуть и восстановиться!", ephemeral=True
+            _("{0} has managed to rest and recover!").format(name.capitalize()), ephemeral=True
         )
 
 

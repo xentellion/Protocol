@@ -51,14 +51,14 @@ class Twitter(commands.Cog):
 
     @group.command(name="register", description="Log in to write as your character")
     async def twitter_login(self, interaction: discord.Interaction):
-        await interaction.response.send_modal(Form(self.bot))
+        await interaction.response.send_modal(Form(self.bot, interaction.locale))
 
     @group.command(name="send", description="Write as your character!")
     @app_commands.autocomplete(character=get_character)
     async def twitter_post(
         self, interaction: discord.Interaction, character: str, image_url: str = None
     ):
-        await interaction.response.send_modal(Message(self.bot, character, image_url))
+        await interaction.response.send_modal(Message(self.bot, interaction.locale, character, image_url))
 
     @group.command(
         name="start_topic", description="Start your character topic in forum!"
@@ -72,7 +72,7 @@ class Twitter(commands.Cog):
         image_url: str = None,
     ):
         await interaction.response.send_modal(
-            TopicStarter(self.bot, character, tag, image_url)
+            TopicStarter(self.bot, interaction.locale, character, tag, image_url)
         )
 
     @group.command(name="delete_account", description="Delete your character")
@@ -80,9 +80,10 @@ class Twitter(commands.Cog):
     async def twitter_delete(self, interaction: discord.Interaction, character: str):
         df = self.bot.characters
         char = df.loc[(df["user"] == interaction.user.id) & (df["login"] == character)]
+        _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
-            "Вы уверены, что хотите удалить персонажа?",
-            view=DeleteConfirm(self.bot, char),
+            _("Are you sure you want to delete the character?"),
+            view=DeleteConfirm(self.bot, interaction.locale, char),
             ephemeral=True,
         )
 
@@ -98,7 +99,11 @@ class Twitter(commands.Cog):
         self.bot.characters = df
         self.bot.characters.to_csv(path)
         self.bot.characters = pd.read_csv(path, index_col=0)
-        await interaction.response.send_message("Аватар изменен ✅", ephemeral=True)
+        _ = self.bot.locale(interaction.locale)
+        await interaction.response.send_message(
+            f"{_('Avatar is changed')} ✅",
+            ephemeral=True
+        )
 
 
 async def setup(bot: Protocol):

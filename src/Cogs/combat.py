@@ -1,9 +1,12 @@
+import os
+import json
 import discord
 import random
 import src.combat_data as combat_data
 from typing import List
 from src.client import Protocol
-from src.data_control import *
+from src.data_control import JsonDataControl
+from src.character_data import Character, Characteristic
 from discord import app_commands
 from discord.ext import commands
 
@@ -44,29 +47,30 @@ class Combat(commands.Cog):
         ]
 
     @group.command(name="begin", description="Initiate combat queue")
-    # ->
     async def init_begin(self, interaction: discord.Interaction):
         await interaction.response.send_message(
-            "<:revolver:603601152885522465>", ephemeral=True
+            "<:revolver:603601152885522465>",
+            ephemeral=True,
         )
         path = self.path.format(interaction.channel.id)
+        _ = self.bot.locale(interaction.locale)
         if os.path.exists(path):
             await interaction.response.send_message(
-                "There is already a combat in this channel!"
+                _("There is already a combat in this channel!")
             )
             return
-        print("New Combat Session")
         message = await interaction.channel.send(
-            "\n".join(self.combat_header() + ["```"])
+            "\n".join(self.combat_header(interaction.locale) + ["```"])
         )
         await message.pin()
         await interaction.channel.send(
-            """**Справка:**
+            _("""**Tips:**
                 `/init begin` - Start combat
                 `/init add` - Join combat
                 `/init next` - Progress queue
                 `/init remove` - Leave combat
                 `/init end` - Finish combat"""
+            )
         )
         JsonDataControl.save_update(
             path, combat_data.Combat(interaction.channel.id, message.id)
@@ -83,7 +87,8 @@ class Combat(commands.Cog):
         msg = await interaction.channel.fetch_message(combat.message)
         await msg.unpin()
         os.remove(path)
-        await interaction.response.send_message("**End of combat**")
+        _ = self.bot.locale(interaction.locale)
+        await interaction.response.send_message(_("**End of combat**"))
 
     @group.command(name="add", description="Join the combat!")
     async def add(
@@ -91,30 +96,23 @@ class Combat(commands.Cog):
         interaction: discord.Interaction,
         mod: str,
         name: str,
-        hp: str = None,
-        en: str = None,
     ):
+        _ = self.bot.locale(interaction.locale)
         if not mod.lstrip("+-").isdigit():
             await interaction.response.send_message(
-                "Modifier is not a number!", ephemeral=True
+                _("Modifier is not a number!"), ephemeral=True
             )
             return
         if len(name) < 3:
-            await interaction.response.send_message("Name too short", ephemeral=True)
+            await interaction.response.send_message(_("Name too short"), ephemeral=True)
             return
-        if not (hp is None or en is None):
-            if not (hp.isdigit() and en.isdigit()):
-                await interaction.response.send_message(
-                    "Stats are not a number!", ephemeral=True
-                )
-                return
 
         path = self.path.format(interaction.channel_id)
         combat = await self.get_file_data(interaction, path)
-
+        print(combat)
         if combat.check_actor(name):
             await interaction.response.send_message(
-                "There is already a character with that name", ephemeral=True
+                _("There is already a character with that name"), ephemeral=True
             )
             return
 
@@ -126,43 +124,24 @@ class Combat(commands.Cog):
         if numb >= combat.get_current().initiative and len(combat.actors) > 1:
             combat.turn += 1
 
-        # add temporary character
-        if not (hp is None and en is None):
-            path_c = f"{self.bot.data_folder}Campaigns/{interaction.guild.id}.json"
-            server = await JsonDataControl.get_file(path_c)
-            if server.campaigns[server.current_c] is not None:
-                new_char = Character(
-                    author=interaction.user.id,
-                    hp=int(hp),
-                    max_hp=int(hp),
-                    energy=int(en),
-                    max_energy=int(en),
-                    reaction=0,
-                    max_reaction=0,
-                    style=0,
-                    max_style=0,
-                )
-                server.campaigns[server.current_c][name] = new_char
-                JsonDataControl.save_update(path_c, server)
-                combat.temp_chars.append(name)
-
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
+        text = "`{0}` has joined the combat with initiative 1d20({1}) {2} {3} = `{4}`"
         await interaction.response.send_message(
-            f"`{actor.name}` has been added to combat with initiative 1d20"
-            + f"({rand}) {'+' if int(mod) > 0 else '-'} {mod.lstrip('+-')} = `{numb}`."
+            text.format(actor.name, rand, '+' if int(mod) > 0 else '-', mod.lstrip('+-'), numb)
         )
 
     @group.command(name="remove", description="Leave the combat")
     @app_commands.autocomplete(name=get_characters)
-    # ->
     async def remove(self, interaction: discord.Interaction, name: str):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
+        _ = self.bot.locale(interaction.locale)
         if actor.name == name:
             await interaction.response.send_message(
-                f"You can't remove characters on their turn!", ephemeral=True
+                _("You can't remove characters on their turn!"),
+                ephemeral=True,
             )
             return
         try:
@@ -171,7 +150,7 @@ class Combat(commands.Cog):
             combat.remove_actors(name)
         except ValueError:
             await interaction.response.send_message(
-                f"`{name}` has not been found", ephemeral=True
+                _("`{0}` has not been found").format(name), ephemeral=True
             )
             return
         if name in combat.temp_chars:
@@ -180,12 +159,11 @@ class Combat(commands.Cog):
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
         await interaction.response.send_message(
-            f"`{name}` has been removed from combat"
+            _("`{0}` has been removed from combat").format(name)
         )
 
     @group.command(name="next", description="Progress the queue")
-    # ->
-    async def remove(self, interaction: discord.Interaction):
+    async def next(self, interaction: discord.Interaction):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
         actor = combat.get_current()
@@ -197,11 +175,13 @@ class Combat(commands.Cog):
             actor = combat.get_current()
             JsonDataControl.save_update(path, combat)
             await self.update_message(interaction, combat)
+            _ = self.bot.locale(interaction.locale)
+            text = _("**Initiative {0} (round {1}):** {2} (<@{3}>)```\n{2}```")
             await interaction.response.send_message(
-                f"**Initiative {actor.initiative} (round {combat.round}):** {actor.name} (<@{actor.author}>)```\n{actor.name}```"
+                text.format(actor.initiative, combat.round, actor.name, actor.author)
             )
         else:
-            await interaction.response.send_message(f"It is <@{actor.author}> turn!")
+            await interaction.response.send_message(_("It is <@{0}> turn!").format(actor.author))
 
     @group.command(name="move", description="Move the character in queue!")
     # @app_commands.checks.has_permissions(administrator=True)
@@ -219,15 +199,16 @@ class Combat(commands.Cog):
         index = combat.actors.index(actor)
         # current check
         current = combat.get_current()
+        _ = self.bot.locale(interaction.locale)
         if current.name == name:
             await interaction.response.send_message(
-                f"You can't move characters on their turn!", ephemeral=True
+                _("You can't move characters on their turn!"), ephemeral=True
             )
             return
         # direction check
         if direction not in self.directions:
             await interaction.response.send_message(
-                "No correct direction chosen", ephemeral=True
+                _("Incorrect direction"), ephemeral=True
             )
             return
         # Extreme shift
@@ -236,12 +217,12 @@ class Combat(commands.Cog):
         # Digit check
         elif not shift.isdigit():
             await interaction.response.send_message(
-                "Movement shift must be a number!", ephemeral=True
+                _("Movement shift must be a number!"), ephemeral=True
             )
             return
         # Zero check
         elif shift == "0":
-            await interaction.response.send_message("Zero movement", ephemeral=True)
+            await interaction.response.send_message(_("Zero movement"), ephemeral=True)
             return
         # Turn to int
         else:
@@ -278,14 +259,14 @@ class Combat(commands.Cog):
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
         await interaction.response.send_message(
-            f"{name} has moved in queue from position `{1 + index}` to `{1 + new_index}`!"
+            _("{0} has moved in queue from position `{1}` to `{2}`!").format(name, index + 1, new_index + 1)
         )
 
     # <------------------------------------------------------------>
 
     async def update_message(self, interaction, combat: combat_data.Combat):
         msg = await interaction.channel.fetch_message(combat.message)
-        text = self.combat_header(combat.actors[combat.turn].initiative, combat.round)
+        text = self.combat_header(interaction.locale, combat.actors[combat.turn].initiative, combat.round)
         for i in range(len(combat.actors)):
             actor = combat.actors[i]
             text.append(
@@ -301,8 +282,9 @@ class Combat(commands.Cog):
             with open(path, "r") as file:
                 data = file.read().replace("\n", "")
         except FileNotFoundError:
+            _ = self.bot.locale(interaction.locale)
             await interaction.response.send_message(
-                "There is no combat in this channel!"
+                _("There is no combat in this channel!")
             )
             return
         c = combat_data.Combat(**json.loads(data))
@@ -310,8 +292,9 @@ class Combat(commands.Cog):
         c.actors = [combat_data.Actor(**x) for x in c.actors]
         return c
 
-    def combat_header(self, initiative: int = 0, round: int = 0):
-        head = f"```md\nCurrent initiative: {initiative} (round {round})"
+    def combat_header(self, locale: str, initiative: int = 0, round: int = 0):
+        _ = self.bot.locale(locale)
+        head = _("```md\nCurrent initiative: {0} (round {1})").format(initiative, round)
         return [head, "=" * (len(head) - 7)]
 
     async def remove_temp_char(self, interaction, name, combat: combat_data.Combat):

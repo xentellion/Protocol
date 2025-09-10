@@ -18,10 +18,10 @@ class RollDice(commands.Cog):
 
     @commands.command(name="roll")
     async def roll_send(self, ctx, *, input_query: str):
+        _ = self.bot.locale(ctx.guild.preferred_locale)
         try:
             await ctx.message.delete()
         except errors.NotFound:
-            print("Message has been deleted\n")
             return
         # --------Separate commentary and strip spaces
         comment = re.sub(regex_comment, "", input_query).strip()
@@ -35,7 +35,7 @@ class RollDice(commands.Cog):
         for j in range(1, len(split), 2):
             dices = list(map(int, split[j].split("d")))
             if dices[0] > 100:
-                await ctx.send("Too many dices in one throw")
+                await ctx.send(_("Too many dices in one throw"))
                 return
             split[j] = f"{dices[0]}d{dices[1]}"
             rand = [randint(1, dices[1]) for _ in range(dices[0])]
@@ -48,7 +48,7 @@ class RollDice(commands.Cog):
             try:
                 text_result.append(f"{split[j]}({', '.join(demo_roll)}){split[j+1]}")
             except IndexError:
-                await ctx.send(f'No dices found in "{input_query}"')
+                await ctx.send(_('No dices found in "{0}"').format(input_query))
                 return
         # --------Calculate rolls
         # one dice - calclulates all rolls individually
@@ -59,7 +59,7 @@ class RollDice(commands.Cog):
             try:
                 summa = round(eval(expression), 2)
             except SyntaxError:
-                await ctx.send("I can't calculate that!")
+                await ctx.send(_("I can't calculate that!"))
                 return
         else:
             expression = [
@@ -68,14 +68,14 @@ class RollDice(commands.Cog):
             try:
                 expression = [round(eval(j), 2) for j in expression]
             except SyntaxError:
-                await ctx.send("I can't calculate that!")
+                await ctx.send(_("I can't calculate that!"))
                 return
             summa = expression[0] if len(expression) == 1 else tuple(expression)
         # --------Result
         comment = "Result" if comment == "" else re.sub(regex_cursive, "*", comment)
-        message = f"{ctx.message.author.mention} 🎲\n**{comment}:** {''.join(text_result)} \n**Total: **{summa}\n"
+        message = f"{ctx.message.author.mention} 🎲\n**{comment}:** {''.join(text_result)} \n**{_('Total')}: **{summa}\n"
         if len(message) > 1950:
-            await ctx.send("The answer is too long")
+            await ctx.send(_("The answer is too long"))
             return
         await ctx.send(message)
 
