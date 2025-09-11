@@ -1,0 +1,394 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-11 21:11+0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/Cogs/roll_dice.py:38
+msgid "Too many dices in one throw"
+msgstr ""
+
+#: src/Cogs/roll_dice.py:51
+#, python-brace-format
+msgid "No dices found in \"{0}\""
+msgstr ""
+
+#: src/Cogs/roll_dice.py:62 src/Cogs/roll_dice.py:71
+msgid "I can't calculate that!"
+msgstr ""
+
+#: src/Cogs/roll_dice.py:75
+msgid "Result"
+msgstr ""
+
+#: src/Cogs/roll_dice.py:76
+msgid "Total"
+msgstr ""
+
+#: src/Cogs/roll_dice.py:79
+msgid "The answer is too long"
+msgstr ""
+
+#: src/Cogs/combat.py:59
+msgid "There is already a combat in this channel!"
+msgstr ""
+
+#: src/Cogs/combat.py:67
+msgid ""
+"**Tips:**\n"
+"                `/init begin` - Start combat\n"
+"                `/init add` - Join combat\n"
+"                `/init next` - Progress queue\n"
+"                `/init remove` - Leave combat\n"
+"                `/init end` - Finish combat"
+msgstr ""
+
+#: src/Cogs/combat.py:93
+msgid "**End of combat**"
+msgstr ""
+
+#: src/Cogs/combat.py:105
+msgid "Modifier is not a number!"
+msgstr ""
+
+#: src/Cogs/combat.py:109
+msgid "Name too short"
+msgstr ""
+
+#: src/Cogs/combat.py:118
+msgid "There is already a character with that name"
+msgstr ""
+
+#: src/Cogs/combat.py:132
+#, python-brace-format
+msgid "`{0}` has joined the combat with initiative 1d20({1}) {2} {3} = `{4}`"
+msgstr ""
+
+#: src/Cogs/combat.py:148
+msgid "You can't remove characters on their turn!"
+msgstr ""
+
+#: src/Cogs/combat.py:158
+#, python-brace-format
+msgid "`{0}` has not been found"
+msgstr ""
+
+#: src/Cogs/combat.py:167
+#, python-brace-format
+msgid "`{0}` has been removed from combat"
+msgstr ""
+
+#: src/Cogs/combat.py:186
+#, python-brace-format
+msgid ""
+"**Initiative {0} (round {1}):** {2} (<@{3}>)```\n"
+"{2}```"
+msgstr ""
+
+#: src/Cogs/combat.py:191
+#, python-brace-format
+msgid "It is <@{0}> turn!"
+msgstr ""
+
+#: src/Cogs/combat.py:212
+msgid "You can't move characters on their turn!"
+msgstr ""
+
+#: src/Cogs/combat.py:218
+msgid "Incorrect direction"
+msgstr ""
+
+#: src/Cogs/combat.py:227
+msgid "Movement shift must be a number!"
+msgstr ""
+
+#: src/Cogs/combat.py:232
+msgid "Zero movement"
+msgstr ""
+
+#: src/Cogs/combat.py:269
+#, python-brace-format
+msgid "{0} has moved in queue from position `{1}` to `{2}`!"
+msgstr ""
+
+#: src/Cogs/combat.py:294
+msgid "There is no combat in this channel!"
+msgstr ""
+
+#: src/Cogs/combat.py:304
+#, python-brace-format
+msgid ""
+"```md\n"
+"Current initiative: {0} (round {1})"
+msgstr ""
+
+#: src/Cogs/characters.py:60 src/Cogs/characters.py:81
+#: src/Cogs/characters.py:90 src/Cogs/characters.py:116
+#: src/Cogs/characters.py:145 src/Cogs/characters.py:170
+msgid "There is no active campaign!"
+msgstr ""
+
+#: src/Cogs/characters.py:67
+#, python-brace-format
+msgid "## Are you sure you want to delete character {0}?"
+msgstr ""
+
+#: src/Cogs/characters.py:93
+#, python-brace-format
+msgid "Author - <@{0}>\n"
+msgstr ""
+
+#: src/Cogs/characters.py:96
+#, python-brace-format
+msgid "**{0}:**\t{1}/{2}"
+msgstr ""
+
+#: src/Cogs/characters.py:98
+#, python-brace-format
+msgid "**{0}:**\t{1}"
+msgstr ""
+
+#: src/Cogs/characters.py:123
+#, python-brace-format
+msgid "Not enough {0}! You dont have {1}!"
+msgstr ""
+
+#: src/Cogs/characters.py:131
+#, python-brace-format
+msgid "{0} {1} have been spent! {3} now has {2} {1}"
+msgstr ""
+
+#: src/Cogs/characters.py:157
+#, python-brace-format
+msgid "{3} has recieved {0} {1}! They have {2} {1}"
+msgstr ""
+
+#: src/Cogs/characters.py:182
+#, python-brace-format
+msgid "{0} has managed to rest and recover!"
+msgstr ""
+
+#: src/Cogs/miscellaneous.py:53
+msgid "Command must be in format `!techo <0-600> text`"
+msgstr ""
+
+#: src/Cogs/miscellaneous.py:57
+msgid "Time can only be set between 0 and 600 seconds"
+msgstr ""
+
+#: src/Cogs/miscellaneous.py:75
+msgid "**PROTOCOL IS INITIALIZED**"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:14
+msgid "Set Character Name"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:15 src/Cogs/Models/twitter.py:16
+msgid "Name"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:18
+msgid "Register a character"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:28
+msgid "There is already a character with that name!"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:41
+#, python-brace-format
+msgid "Character `{0}` is created! Don't forget to set up their charateristics"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:196
+#: src/Cogs/Models/campaign.py:42 src/Cogs/Models/campaign.py:108
+msgid "YES"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:196
+#: src/Cogs/Models/campaign.py:42 src/Cogs/Models/campaign.py:108
+msgid "NO"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:62
+msgid "## Character Deleted"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:67 src/Cogs/Models/twitter.py:210
+#: src/Cogs/Models/campaign.py:123
+msgid "Cancelled"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:88
+msgid "New value"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:103
+msgid "Only numbers in stat values!"
+msgstr ""
+
+#: src/Cogs/Models/characters.py:108
+#, python-brace-format
+msgid "Character `{0}` has been updated!"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:12
+msgid "Register your character!"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:15
+msgid "Set character name"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:24
+msgid "Insert link on character avatar"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:25
+msgid "Link MUST end with file format: .jpeg, .png"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:52
+msgid "Write the message"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:57
+msgid "Enter your message"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:58
+msgid "Message"
+msgstr ""
+
+#: src/Cogs/Models/twitter.py:206
+msgid "Character deleted"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:12
+msgid "Start new campaign!"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:15
+msgid "Write campaign name"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:16
+msgid "Title"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:24
+#, python-brace-format
+msgid "{0} already exists"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:29
+msgid "Do you want to create one more characteristic for this campaign?"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:56
+#, python-brace-format
+msgid "## Campaign {0} has been created!"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:78
+msgid "New characteristic"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:81
+msgid "Stat"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:82
+msgid "Stat name"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:87
+msgid "No"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:88
+msgid "Is limited by max value?"
+msgstr ""
+
+#: src/Cogs/Models/campaign.py:118
+msgid "## Campaign Deleted"
+msgstr ""
+
+#: src/Cogs/twitter.py:85
+msgid "Are you sure you want to delete the character?"
+msgstr ""
+
+#: src/Cogs/shooter.py:23
+msgid "There is no easy way out of here."
+msgstr ""
+
+#: src/Cogs/shooter.py:26
+msgid "Pointless. You cannot stop The Protocol."
+msgstr ""
+
+#: src/Cogs/shooter.py:30
+#, python-brace-format
+msgid "You shot {0}"
+msgstr ""
+
+#: src/Cogs/shooter.py:32
+msgid "Miss! Such a shame."
+msgstr ""
+
+#: src/Cogs/shooter.py:39
+msgid "You took a revolover in your hand"
+msgstr ""
+
+#: src/Cogs/shooter.py:42
+msgid "You checked the drum and spun it"
+msgstr ""
+
+#: src/Cogs/shooter.py:45
+msgid "You pressed the gun to your temple..."
+msgstr ""
+
+#: src/Cogs/shooter.py:51
+#, python-brace-format
+msgid "The sound of a blast rang and {0}'s body collapsed to the ground"
+msgstr ""
+
+#: src/Cogs/shooter.py:54
+msgid "Misfire! Pass the gun to the one next to you. Let them test their luck."
+msgstr ""
+
+#: src/Cogs/campaign.py:55
+#, python-brace-format
+msgid "## Are you sure you want to delete campaign {0}?"
+msgstr ""
+
+#: src/Cogs/campaign.py:75
+msgid "THERE ARE NO CAMPAIGNS ON THIS SERVER"
+msgstr ""
+
+#: src/Cogs/campaign.py:79
+#, python-brace-format
+msgid ""
+"```md\n"
+"CAMPAIGNS OF THIS SERVER \n"
+"========================\n"
+"{0}```"
+msgstr ""
+
+#: src/Cogs/campaign.py:95
+#, python-brace-format
+msgid "## Campaign `{0}` has been set as Active!"
+msgstr ""

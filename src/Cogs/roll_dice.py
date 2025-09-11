@@ -72,8 +72,9 @@ class RollDice(commands.Cog):
                 return
             summa = expression[0] if len(expression) == 1 else tuple(expression)
         # --------Result
-        comment = "Result" if comment == "" else re.sub(regex_cursive, "*", comment)
-        message = f"{ctx.message.author.mention} 🎲\n**{comment}:** {''.join(text_result)} \n**{_('Total')}: **{summa}\n"
+        comment = _("Result") if comment == "" else re.sub(regex_cursive, "*", comment)
+        total = _('Total')
+        message = f"{ctx.message.author.mention} 🎲\n**{comment}:** {''.join(text_result)} \n**{total}: **{summa}\n"
         if len(message) > 1950:
             await ctx.send(_("The answer is too long"))
             return

@@ -2,8 +2,8 @@
 /Data/*
 !.gitkeep
 !help.yml
-!locales/
 /.vscode
+POTFILES
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

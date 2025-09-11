@@ -82,6 +82,8 @@ class Combat(commands.Cog):
     async def init_end(self, interaction: discord.Interaction):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
+        if combat is None:
+            return
         for temp in combat.temp_chars:
             await self.remove_temp_char(interaction, temp, combat)
         msg = await interaction.channel.fetch_message(combat.message)
@@ -109,7 +111,8 @@ class Combat(commands.Cog):
 
         path = self.path.format(interaction.channel_id)
         combat = await self.get_file_data(interaction, path)
-        print(combat)
+        if combat is None:
+            return
         if combat.check_actor(name):
             await interaction.response.send_message(
                 _("There is already a character with that name"), ephemeral=True
@@ -126,7 +129,7 @@ class Combat(commands.Cog):
 
         JsonDataControl.save_update(path, combat)
         await self.update_message(interaction, combat)
-        text = "`{0}` has joined the combat with initiative 1d20({1}) {2} {3} = `{4}`"
+        text = _("`{0}` has joined the combat with initiative 1d20({1}) {2} {3} = `{4}`")
         await interaction.response.send_message(
             text.format(actor.name, rand, '+' if int(mod) > 0 else '-', mod.lstrip('+-'), numb)
         )
@@ -136,6 +139,8 @@ class Combat(commands.Cog):
     async def remove(self, interaction: discord.Interaction, name: str):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
+        if combat is None:
+            return
         actor = combat.get_current()
         _ = self.bot.locale(interaction.locale)
         if actor.name == name:
@@ -166,7 +171,10 @@ class Combat(commands.Cog):
     async def next(self, interaction: discord.Interaction):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
+        if combat is None:
+            return
         actor = combat.get_current()
+        _ = self.bot.locale(interaction.locale)
         if (
             interaction.user.id == actor.author
             or interaction.user.guild_permissions.administrator
@@ -175,7 +183,6 @@ class Combat(commands.Cog):
             actor = combat.get_current()
             JsonDataControl.save_update(path, combat)
             await self.update_message(interaction, combat)
-            _ = self.bot.locale(interaction.locale)
             text = _("**Initiative {0} (round {1}):** {2} (<@{3}>)```\n{2}```")
             await interaction.response.send_message(
                 text.format(actor.initiative, combat.round, actor.name, actor.author)
