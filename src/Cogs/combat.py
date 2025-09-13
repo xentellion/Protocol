@@ -6,9 +6,11 @@ import src.combat_data as combat_data
 from typing import List
 from src.client import Protocol
 from src.data_control import JsonDataControl
-from src.character_data import Character, Characteristic
 from discord import app_commands
+from discord.app_commands import locale_str
 from discord.ext import commands
+
+_ = lambda x: x
 
 
 class Combat(commands.Cog):
@@ -46,7 +48,7 @@ class Combat(commands.Cog):
             if selection.lower() in x.lower()
         ]
 
-    @group.command(name="begin", description="Initiate combat queue")
+    @group.command(name="begin", description=locale_str(_("Initiate combat")))
     async def init_begin(self, interaction: discord.Interaction):
         await interaction.response.send_message(
             "<:revolver:603601152885522465>",
@@ -76,9 +78,8 @@ class Combat(commands.Cog):
             path, combat_data.Combat(interaction.channel.id, message.id)
         )
 
-    @group.command(name="end", description="Finish the combat")
+    @group.command(name="end", description=locale_str(_("Finish the combat")))
     @app_commands.checks.has_permissions(administrator=True)
-    # ->
     async def init_end(self, interaction: discord.Interaction):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
@@ -92,7 +93,11 @@ class Combat(commands.Cog):
         _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(_("**End of combat**"))
 
-    @group.command(name="add", description="Join the combat!")
+    @group.command(name="add", description=locale_str(_("Join the combat!")))
+    @app_commands.describe(
+        mod=locale_str(_("Initiative modifier")),
+        name=locale_str(_("Character name"))
+    )
     async def add(
         self,
         interaction: discord.Interaction,
@@ -134,7 +139,10 @@ class Combat(commands.Cog):
             text.format(actor.name, rand, '+' if int(mod) > 0 else '-', mod.lstrip('+-'), numb)
         )
 
-    @group.command(name="remove", description="Leave the combat")
+    @group.command(name="remove", description=locale_str(_("Leave the combat")))
+    @app_commands.describe(
+        name=locale_str(_("Character name"))
+    )
     @app_commands.autocomplete(name=get_characters)
     async def remove(self, interaction: discord.Interaction, name: str):
         path = self.path.format(interaction.channel.id)
@@ -167,7 +175,7 @@ class Combat(commands.Cog):
             _("`{0}` has been removed from combat").format(name)
         )
 
-    @group.command(name="next", description="Progress the queue")
+    @group.command(name="next", description=locale_str(_("Progress the queue")))
     async def next(self, interaction: discord.Interaction):
         path = self.path.format(interaction.channel.id)
         combat = await self.get_file_data(interaction, path)
@@ -190,8 +198,12 @@ class Combat(commands.Cog):
         else:
             await interaction.response.send_message(_("It is <@{0}> turn!").format(actor.author))
 
-    @group.command(name="move", description="Move the character in queue!")
-    # @app_commands.checks.has_permissions(administrator=True)
+    @group.command(name="move", description=locale_str(_("Move the character in queue!")))
+    @app_commands.describe(
+        name=locale_str(_("Character name")),
+        direction=locale_str(_("Movement direction")),
+        shift=locale_str(_("Amount of positions to move"))
+    )
     @app_commands.autocomplete(name=get_characters, direction=get_direction)
     async def move(
         self,

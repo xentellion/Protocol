@@ -5,7 +5,11 @@ from .Models.campaign import DeleteConfirm, CreateCampaign
 from src.data_control import JsonDataControl
 from src.character_data import DnDServer
 from discord import app_commands
+from discord.app_commands import locale_str
 from discord.ext import commands
+
+
+_ = lambda x: x
 
 
 class Campaign(commands.Cog):
@@ -35,7 +39,7 @@ class Campaign(commands.Cog):
             return await JsonDataControl.get_file(path)
 
     # CAMPAIGN START
-    @group.command(name="start", description="Start new Campaign for new characters!")
+    @group.command(name="start", description=locale_str(_("Start new Campaign for new characters!")))
     @app_commands.checks.has_permissions(administrator=True)
     async def campaign_start(self, interaction: discord.Interaction):
         camp = await self.get_camp_data(interaction)
@@ -46,7 +50,10 @@ class Campaign(commands.Cog):
         )
 
     # CAMPAIGN DELETE
-    @group.command(name="delete", description="Delete finished campaign!")
+    @group.command(name="delete", description=locale_str(_("Delete finished campaign!")))
+    @app_commands.describe(
+        name=locale_str(_("Campaign name"))
+    )
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.autocomplete(name=get_campaigns)
     async def campaign_delete(self, interaction: discord.Interaction, name: str):
@@ -60,7 +67,7 @@ class Campaign(commands.Cog):
     # CAMPAIGN VIEW
     @group.command(
         name="view",
-        description="Check the list of all available campaigns on this server!",
+        description=locale_str(_("Check the list of all available campaigns on this server!")),
     )
     async def campaign_view(self, interaction: discord.Interaction):
         camp = await self.get_camp_data(interaction)
@@ -80,8 +87,11 @@ class Campaign(commands.Cog):
         )
 
     # CAMPAIGN SET
-    @group.command(name="set", description="Set campain and characters to be active!")
+    @group.command(name="set", description=locale_str(_("Set campain and characters to be active!")))
     @app_commands.autocomplete(name=get_campaigns)
+    @app_commands.describe(
+        name=locale_str(_("Campaign name"))
+    )
     @app_commands.checks.has_permissions(administrator=True)
     #  ->
     async def campaign_set(self, interaction: discord.Interaction, name: str):

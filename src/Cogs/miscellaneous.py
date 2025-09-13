@@ -5,7 +5,11 @@ from src.enums import Enums
 from src.client import Protocol
 from discord import app_commands
 from discord.ext import commands
+from discord.app_commands import locale_str
 from .Models.help import HelpView
+
+
+_ = lambda x: x
 
 
 class Misc(commands.Cog):
@@ -27,7 +31,7 @@ class Misc(commands.Cog):
         print(f"> Total characters: {len(df.index)}")
         print(f"{self.bot.user.name} has connected to Discord")
 
-    @app_commands.command(name="help", description="Get Protocol info!")
+    @app_commands.command(name="help", description=locale_str(_("Get Protocol info!")))
     async def help(self, interaction: discord.Interaction):
         view = HelpView(self.bot)
         await interaction.response.send_message(
@@ -84,6 +88,7 @@ class Misc(commands.Cog):
     @commands.command(name="sync")
     @commands.has_permissions(administrator=True)
     async def sync(self, ctx) -> None:
+        ctx.bot.tree.clear_commands(guild=ctx.guild)
         synced = await ctx.bot.tree.sync()
         await ctx.send(f"Synced {len(synced)} commands globally")
         return

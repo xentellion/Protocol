@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-13 18:15+0300\n"
+"POT-Creation-Date: 2025-09-13 22:47+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,11 +42,15 @@ msgstr ""
 msgid "The answer is too long"
 msgstr ""
 
-#: src/Cogs/combat.py:59
+#: src/Cogs/combat.py:51
+msgid "Initiate combat"
+msgstr ""
+
+#: src/Cogs/combat.py:61
 msgid "There is already a combat in this channel!"
 msgstr ""
 
-#: src/Cogs/combat.py:67
+#: src/Cogs/combat.py:69
 msgid ""
 "**Tips:**\n"
 "                `/init begin` - Start combat\n"
@@ -56,140 +60,228 @@ msgid ""
 "                `/init end` - Finish combat"
 msgstr ""
 
-#: src/Cogs/combat.py:93
+#: src/Cogs/combat.py:81
+msgid "Finish the combat"
+msgstr ""
+
+#: src/Cogs/combat.py:94
 msgid "**End of combat**"
 msgstr ""
 
-#: src/Cogs/combat.py:105
+#: src/Cogs/combat.py:96
+msgid "Join the combat!"
+msgstr ""
+
+#: src/Cogs/combat.py:98
+msgid "Initiative modifier"
+msgstr ""
+
+#: src/Cogs/combat.py:99 src/Cogs/combat.py:144 src/Cogs/combat.py:203
+#: src/Cogs/characters.py:68 src/Cogs/characters.py:81
+#: src/Cogs/characters.py:96 src/Cogs/characters.py:123
+#: src/Cogs/characters.py:157 src/Cogs/characters.py:189 src/Cogs/twitter.py:62
+#: src/Cogs/twitter.py:76 src/Cogs/twitter.py:93 src/Cogs/twitter.py:108
+msgid "Character name"
+msgstr ""
+
+#: src/Cogs/combat.py:110
 msgid "Modifier is not a number!"
 msgstr ""
 
-#: src/Cogs/combat.py:109
+#: src/Cogs/combat.py:114
 msgid "Name too short"
 msgstr ""
 
-#: src/Cogs/combat.py:118
+#: src/Cogs/combat.py:123
 msgid "There is already a character with that name"
 msgstr ""
 
-#: src/Cogs/combat.py:132
+#: src/Cogs/combat.py:137
 #, python-brace-format
 msgid "`{0}` has joined the combat with initiative 1d20({1}) {2} {3} = `{4}`"
 msgstr ""
 
-#: src/Cogs/combat.py:148
+#: src/Cogs/combat.py:142
+msgid "Leave the combat"
+msgstr ""
+
+#: src/Cogs/combat.py:156
 msgid "You can't remove characters on their turn!"
 msgstr ""
 
-#: src/Cogs/combat.py:158
+#: src/Cogs/combat.py:166
 #, python-brace-format
 msgid "`{0}` has not been found"
 msgstr ""
 
-#: src/Cogs/combat.py:167
+#: src/Cogs/combat.py:175
 #, python-brace-format
 msgid "`{0}` has been removed from combat"
 msgstr ""
 
-#: src/Cogs/combat.py:186
+#: src/Cogs/combat.py:178
+msgid "Progress the queue"
+msgstr ""
+
+#: src/Cogs/combat.py:194
 #, python-brace-format
 msgid ""
 "**Initiative {0} (round {1}):** {2} (<@{3}>)```\n"
 "{2}```"
 msgstr ""
 
-#: src/Cogs/combat.py:191
+#: src/Cogs/combat.py:199
 #, python-brace-format
 msgid "It is <@{0}> turn!"
 msgstr ""
 
-#: src/Cogs/combat.py:212
+#: src/Cogs/combat.py:201
+msgid "Move the character in queue!"
+msgstr ""
+
+#: src/Cogs/combat.py:204
+msgid "Movement direction"
+msgstr ""
+
+#: src/Cogs/combat.py:205
+msgid "Amount of positions to move"
+msgstr ""
+
+#: src/Cogs/combat.py:224
 msgid "You can't move characters on their turn!"
 msgstr ""
 
-#: src/Cogs/combat.py:218
+#: src/Cogs/combat.py:230
 msgid "Incorrect direction"
 msgstr ""
 
-#: src/Cogs/combat.py:227
+#: src/Cogs/combat.py:239
 msgid "Movement shift must be a number!"
 msgstr ""
 
-#: src/Cogs/combat.py:232
+#: src/Cogs/combat.py:244
 msgid "Zero movement"
 msgstr ""
 
-#: src/Cogs/combat.py:269
+#: src/Cogs/combat.py:281
 #, python-brace-format
 msgid "{0} has moved in queue from position `{1}` to `{2}`!"
 msgstr ""
 
-#: src/Cogs/combat.py:294
+#: src/Cogs/combat.py:306
 msgid "There is no combat in this channel!"
 msgstr ""
 
-#: src/Cogs/combat.py:304
+#: src/Cogs/combat.py:316
 #, python-brace-format
 msgid ""
 "```md\n"
 "Current initiative: {0} (round {1})"
 msgstr ""
 
-#: src/Cogs/characters.py:60 src/Cogs/characters.py:81
-#: src/Cogs/characters.py:90 src/Cogs/characters.py:116
-#: src/Cogs/characters.py:145 src/Cogs/characters.py:170
+#: src/Cogs/characters.py:55
+msgid "Create character for combat!"
+msgstr ""
+
+#: src/Cogs/characters.py:64 src/Cogs/characters.py:92
+#: src/Cogs/characters.py:103 src/Cogs/characters.py:134
+#: src/Cogs/characters.py:168 src/Cogs/characters.py:196
 msgid "There is no active campaign!"
 msgstr ""
 
-#: src/Cogs/characters.py:67
+#: src/Cogs/characters.py:66
+msgid "Remove the unused character!"
+msgstr ""
+
+#: src/Cogs/characters.py:74
 #, python-brace-format
 msgid "## Are you sure you want to delete character {0}?"
 msgstr ""
 
-#: src/Cogs/characters.py:93
+#: src/Cogs/characters.py:79
+msgid "Fix character stats!"
+msgstr ""
+
+#: src/Cogs/characters.py:82
+msgid "Character stat"
+msgstr ""
+
+#: src/Cogs/characters.py:94
+msgid "Check character stats!"
+msgstr ""
+
+#: src/Cogs/characters.py:106
 #, python-brace-format
 msgid "Author - <@{0}>\n"
 msgstr ""
 
-#: src/Cogs/characters.py:96
+#: src/Cogs/characters.py:109
 #, python-brace-format
 msgid "**{0}:**\t{1}/{2}"
 msgstr ""
 
-#: src/Cogs/characters.py:98
+#: src/Cogs/characters.py:111
 #, python-brace-format
 msgid "**{0}:**\t{1}"
 msgstr ""
 
-#: src/Cogs/characters.py:123
+#: src/Cogs/characters.py:121
+msgid "Recieve damage or lose money!"
+msgstr ""
+
+#: src/Cogs/characters.py:124 src/Cogs/characters.py:158
+msgid "Affected resource"
+msgstr ""
+
+#: src/Cogs/characters.py:125
+msgid "Amount of lost items or points"
+msgstr ""
+
+#: src/Cogs/characters.py:141
 #, python-brace-format
 msgid "Not enough {0}! You dont have {1}!"
 msgstr ""
 
-#: src/Cogs/characters.py:131
+#: src/Cogs/characters.py:149
 #, python-brace-format
 msgid "{0} {1} have been spent! {3} now has {2} {1}"
 msgstr ""
 
-#: src/Cogs/characters.py:157
+#: src/Cogs/characters.py:154
+msgid "Heal your wounds or get money!"
+msgstr ""
+
+#: src/Cogs/characters.py:159
+msgid "Amount of gained items or points"
+msgstr ""
+
+#: src/Cogs/characters.py:180
 #, python-brace-format
 msgid "{3} has recieved {0} {1}! They have {2} {1}"
 msgstr ""
 
-#: src/Cogs/characters.py:182
+#: src/Cogs/characters.py:186
+msgid "Recover restorable resources"
+msgstr ""
+
+#: src/Cogs/characters.py:208
 #, python-brace-format
 msgid "{0} has managed to rest and recover!"
 msgstr ""
 
-#: src/Cogs/miscellaneous.py:53
+#: src/Cogs/miscellaneous.py:34
+msgid "Get Protocol info!"
+msgstr ""
+
+#: src/Cogs/miscellaneous.py:60
 msgid "Command must be in format `!techo <0-600> text`"
 msgstr ""
 
-#: src/Cogs/miscellaneous.py:57
+#: src/Cogs/miscellaneous.py:64
 msgid "Time can only be set between 0 and 600 seconds"
 msgstr ""
 
-#: src/Cogs/miscellaneous.py:75
+#: src/Cogs/miscellaneous.py:82
 msgid "**PROTOCOL IS INITIALIZED**"
 msgstr ""
 
@@ -348,8 +440,36 @@ msgstr ""
 msgid "## Campaign Deleted"
 msgstr ""
 
-#: src/Cogs/twitter.py:85
+#: src/Cogs/twitter.py:56
+msgid "Log in to write as your character!"
+msgstr ""
+
+#: src/Cogs/twitter.py:60
+msgid "Write as your character!"
+msgstr ""
+
+#: src/Cogs/twitter.py:63
+msgid "Append image form this link to the message!"
+msgstr ""
+
+#: src/Cogs/twitter.py:77
+msgid "Append forum tag to your post"
+msgstr ""
+
+#: src/Cogs/twitter.py:90
+msgid "Delete your character"
+msgstr ""
+
+#: src/Cogs/twitter.py:100
 msgid "Are you sure you want to delete the character?"
+msgstr ""
+
+#: src/Cogs/twitter.py:105
+msgid "Change character avatar"
+msgstr ""
+
+#: src/Cogs/twitter.py:109
+msgid "Append image form this link to set as character profile picture!"
 msgstr ""
 
 #: src/Cogs/shooter.py:23
@@ -390,16 +510,32 @@ msgstr ""
 msgid "Misfire! Pass the gun to the one next to you. Let them test their luck."
 msgstr ""
 
-#: src/Cogs/campaign.py:55
+#: src/Cogs/campaign.py:42
+msgid "Start new Campaign for new characters!"
+msgstr ""
+
+#: src/Cogs/campaign.py:53
+msgid "Delete finished campaign!"
+msgstr ""
+
+#: src/Cogs/campaign.py:55 src/Cogs/campaign.py:93
+msgid "Campaign name"
+msgstr ""
+
+#: src/Cogs/campaign.py:62
 #, python-brace-format
 msgid "## Are you sure you want to delete campaign {0}?"
 msgstr ""
 
-#: src/Cogs/campaign.py:75
+#: src/Cogs/campaign.py:70
+msgid "Check the list of all available campaigns on this server!"
+msgstr ""
+
+#: src/Cogs/campaign.py:82
 msgid "THERE ARE NO CAMPAIGNS ON THIS SERVER"
 msgstr ""
 
-#: src/Cogs/campaign.py:79
+#: src/Cogs/campaign.py:86
 #, python-brace-format
 msgid ""
 "```md\n"
@@ -408,7 +544,11 @@ msgid ""
 "{0}```"
 msgstr ""
 
-#: src/Cogs/campaign.py:95
+#: src/Cogs/campaign.py:90
+msgid "Set campain and characters to be active!"
+msgstr ""
+
+#: src/Cogs/campaign.py:105
 #, python-brace-format
 msgid "## Campaign `{0}` has been set as Active!"
 msgstr ""

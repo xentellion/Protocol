@@ -4,7 +4,11 @@ from src.data_control import JsonDataControl
 from typing import List
 from src.client import Protocol
 from discord import app_commands
+from discord.app_commands import locale_str
 from discord.ext import commands
+
+
+_ = lambda x: x
 
 
 class Characters(commands.Cog):
@@ -48,7 +52,7 @@ class Characters(commands.Cog):
             if selection.lower() in x.lower()
         ]
 
-    @group.command(name="create", description="Create character for combat!")
+    @group.command(name="create", description=locale_str(_("Create character for combat!")))
     async def add_char(self, interaction: discord.Interaction):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
         if server.current_c in server.campaigns:
@@ -59,17 +63,24 @@ class Characters(commands.Cog):
             _ = self.bot.locale(interaction.locale)
             await interaction.response.send_message(_("There is no active campaign!"))
 
-    @group.command(name="delete", description="Remove the unused character!")
+    @group.command(name="delete", description=locale_str(_("Remove the unused character!")))
+    @app_commands.describe(
+        name=locale_str(_("Character name"))
+    )
     @app_commands.autocomplete(name=get_characters)
     async def remove_char(self, interaction: discord.Interaction, name: str):
         _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
             _("## Are you sure you want to delete character {0}?").format(name),
             view=DeleteConfirm(self.bot, interaction.locale, name),
-            ephemeral=True,
+            ephemeral=False,
         )
 
-    @group.command(name="edit", description="Fix character errors!")
+    @group.command(name="edit", description=locale_str(_("Fix character stats!")))
+    @app_commands.describe(
+        name=locale_str(_("Character name")),
+        stat=locale_str(_("Character stat"))
+    )
     @app_commands.autocomplete(name=get_characters, stat=get_stats)
     async def edit_char(self, interaction: discord.Interaction, name: str, stat: str):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
@@ -80,9 +91,11 @@ class Characters(commands.Cog):
             _ = self.bot.locale(interaction.locale)
             await interaction.response.send_message(_("There is no active campaign!"))
 
-    @group.command(name="status", description="Check character stats!")
+    @group.command(name="status", description=locale_str(_("Check character stats!")))
+    @app_commands.describe(
+        name=locale_str(_("Character name"))
+    )
     @app_commands.autocomplete(name=get_characters)
-    # ->
     async def show_char(self, interaction: discord.Interaction, name: str):
         server = await JsonDataControl.get_file(self.path.format(interaction.guild.id))
         _ = self.bot.locale(interaction.locale)
@@ -105,7 +118,12 @@ class Characters(commands.Cog):
         )
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @group.command(name="lose", description="Получите урон или потратьте деньги!")
+    @group.command(name="lose", description=locale_str(_("Recieve damage or lose money!")))
+    @app_commands.describe(
+        name=locale_str(_("Character name")),
+        resource=locale_str(_("Affected resource")),
+        value=locale_str(_("Amount of lost items or points"))
+    )
     @app_commands.autocomplete(name=get_characters, resource=get_stats)
     async def spend_char(
         self, interaction: discord.Interaction, name: str, resource: str, value: int
@@ -133,7 +151,12 @@ class Characters(commands.Cog):
         )
 
     @group.command(
-        name="gain", description="Излечите раны или получите денег - улучшите ситуацию!"
+        name="gain", description=locale_str(_("Heal your wounds or get money!"))
+    )
+    @app_commands.describe(
+        name=locale_str(_("Character name")),
+        resource=locale_str(_("Affected resource")),
+        value=locale_str(_("Amount of gained items or points"))
     )
     @app_commands.autocomplete(name=get_characters, resource=get_stats)
     async def restore_char(
@@ -160,7 +183,10 @@ class Characters(commands.Cog):
 
     @group.command(
         name="rest",
-        description="Восстановить потраченные ресурсы",
+        description=locale_str(_("Recover restorable resources")),
+    )
+    @app_commands.describe(
+        name=locale_str(_("Character name"))
     )
     @app_commands.autocomplete(name=get_characters)
     async def rest_char(self, interaction: discord.Interaction, name: str):
@@ -179,7 +205,7 @@ class Characters(commands.Cog):
         server.campaigns[server.current_c].characters[name] = character
         JsonDataControl.save_update(self.path.format(interaction.guild.id), server)
         await interaction.response.send_message(
-            _("{0} has managed to rest and recover!").format(name.capitalize()), ephemeral=True
+            _("{0} has managed to rest and recover!").format(name.capitalize()), ephemeral=False
         )
 
 

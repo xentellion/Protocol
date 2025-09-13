@@ -11,9 +11,10 @@ class JsonDataControl:
         except FileNotFoundError:
             print("New DnD server!")
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "a+") as file:
-                file.write(DnDServer().toJSON())
-                data = file.read().replace("\n", "")
+            with open(path, "w") as file:
+                server = DnDServer()
+                file.write(server.toJSON())
+                return server
         return DnDServer(**json.loads(data))
 
     def save_update(path: str, data) -> None:

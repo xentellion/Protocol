@@ -5,7 +5,11 @@ from typing import List
 from src.client import Protocol
 from discord import app_commands
 from discord.ext import commands
+from discord.app_commands import locale_str
 from .Models.twitter import DeleteConfirm, TopicStarter, Form, Message
+
+
+_ = lambda x: x
 
 
 class Twitter(commands.Cog):
@@ -49,11 +53,15 @@ class Twitter(commands.Cog):
             if current.lower() in choice.name.lower()
         ]
 
-    @group.command(name="register", description="Log in to write as your character")
+    @group.command(name="register", description=locale_str(_("Log in to write as your character!")))
     async def twitter_login(self, interaction: discord.Interaction):
         await interaction.response.send_modal(Form(self.bot, interaction.locale))
 
-    @group.command(name="send", description="Write as your character!")
+    @group.command(name="send", description=locale_str(_("Write as your character!")))
+    @app_commands.describe(
+        character=locale_str(_("Character name")),
+        image_url=locale_str(_("Append image form this link to the message!"))
+    )
     @app_commands.autocomplete(character=get_character)
     async def twitter_post(
         self, interaction: discord.Interaction, character: str, image_url: str = None
@@ -64,6 +72,10 @@ class Twitter(commands.Cog):
         name="start_topic", description="Start your character topic in forum!"
     )
     @app_commands.autocomplete(character=get_character, tag=get_forum_tags)
+    @app_commands.describe(
+        character=locale_str(_("Character name")),
+        tag=locale_str(_("Append forum tag to your post"))
+    )
     async def twitter_ts(
         self,
         interaction: discord.Interaction,
@@ -75,8 +87,11 @@ class Twitter(commands.Cog):
             TopicStarter(self.bot, interaction.locale, character, tag, image_url)
         )
 
-    @group.command(name="delete_account", description="Delete your character")
+    @group.command(name="delete_account", description=locale_str(_("Delete your character")))
     @app_commands.autocomplete(character=get_character)
+    @app_commands.describe(
+        character=locale_str(_("Character name")),
+    )
     async def twitter_delete(self, interaction: discord.Interaction, character: str):
         df = self.bot.characters
         char = df.loc[(df["user"] == interaction.user.id) & (df["login"] == character)]
@@ -87,8 +102,12 @@ class Twitter(commands.Cog):
             ephemeral=True,
         )
 
-    @group.command(name="change_avatar", description="Change character avatar")
+    @group.command(name="change_avatar", description=locale_str(_("Change character avatar")))
     @app_commands.autocomplete(character=get_character)
+    @app_commands.describe(
+        character=locale_str(_("Character name")),
+        avatar=locale_str(_("Append image form this link to set as character profile picture!"))
+    )
     async def change_avatar(
         self, interaction: discord.Interaction, character: str, *, avatar: str
     ):

@@ -5,6 +5,7 @@ import gettext
 import discord
 from json import JSONDecodeError
 from discord.ext import commands
+from discord.app_commands import Translator, locale_str, TranslationContext
 
 
 class ConfigFile:
@@ -63,7 +64,6 @@ class Protocol(commands.Bot):
     def locale(self, locale: str):
         locale = str(locale)
         if locale not in self.__locales:
-            print(self.__locales)
             locale = "en_US"
         return self.__locales[locale].gettext
 
@@ -73,8 +73,29 @@ class Protocol(commands.Bot):
             return self.__help_locales["en_US"]
         return self.__help_locales[locale]
 
+    def get_locales(self):
+        return self.__locales
+
     async def setup_hook(self):
         await self.tree.sync(guild=discord.Object(id=557589422372028416))
+        await self.tree.set_translator(ProtocolTranslator(self))
 
     async def on_command_error(self, ctx, error):
         print(error)
+
+
+class ProtocolTranslator(Translator):
+    def __init__(self, bot: Protocol):
+        self.__locales = bot.get_locales()
+
+    async def translate(
+            self,
+            string: locale_str,
+            locale: discord.Locale,
+            context: TranslationContext
+    ):
+        lcl = str(locale)
+        if lcl not in self.__locales:
+            lcl = "en_US"
+        _ = self.__locales[lcl].gettext
+        return _(string.message)

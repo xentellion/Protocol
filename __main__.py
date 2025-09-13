@@ -22,6 +22,7 @@ async def main():
     for f in os.listdir("./src/Cogs"):
         if f.endswith(".py"):
             await protocol.load_extension(f"src.Cogs.{f[:-3]}")
+
     await protocol.start(protocol.config.token)
 
 
