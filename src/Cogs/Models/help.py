@@ -11,10 +11,10 @@ class HelpView(discord.ui.View):
         self.add_buttons()
 
     async def page_next(self, interaction: discord.Interaction):
-        if self.page < len(self.bot.help) - 1:
+        if self.page < len(self.bot.help_locale(interaction.locale)) - 1:
             self.page += 1
             await interaction.response.edit_message(
-                embed=self.set_embed(self.bot.help[self.page])
+                embed=self.set_embed(self.bot.help_locale(interaction.locale)[self.page])
             )
         else:
             await interaction.response.defer()
@@ -22,14 +22,14 @@ class HelpView(discord.ui.View):
     async def page_home(self, interaction: discord.Interaction):
         self.page = 0
         await interaction.response.edit_message(
-            embed=self.set_embed(self.bot.help[self.page])
+            embed=self.set_embed(self.bot.help_locale(interaction.locale)[self.page])
         )
 
     async def page_back(self, interaction: discord.Interaction):
         if self.page > 0:
             self.page -= 1
             await interaction.response.edit_message(
-                embed=self.set_embed(self.bot.help[self.page])
+                embed=self.set_embed(self.bot.help_locale(interaction.locale)[self.page])
             )
         else:
             await interaction.response.defer()

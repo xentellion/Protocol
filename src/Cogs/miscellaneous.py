@@ -2,13 +2,14 @@ import asyncio
 import discord
 import pandas as pd
 from src.enums import Enums
+from src.client import Protocol
 from discord import app_commands
 from discord.ext import commands
 from .Models.help import HelpView
 
 
 class Misc(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Protocol):
         self.bot = bot
 
     @commands.Cog.listener()
@@ -30,7 +31,9 @@ class Misc(commands.Cog):
     async def help(self, interaction: discord.Interaction):
         view = HelpView(self.bot)
         await interaction.response.send_message(
-            embed=view.set_embed(self.bot.help[0]), view=view, ephemeral=True
+            embed=view.set_embed(self.bot.help_locale(interaction.locale)[0]),
+            view=view,
+            ephemeral=True,
         )
 
     @commands.command(name="message")

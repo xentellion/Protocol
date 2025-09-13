@@ -1,0 +1,38 @@
+- General information:
+    Protocol : "Bot, designed for the worlds of **The Shores** and capable to work with any kind of TTRPGs.\n\nHas an unhealthy obsession towards plot twists and human suffering.\n\nFavorite passtime - contemplate worlds, destroyed specifically by his own actions."
+    Prefix : Command prefix is `!`, e.g. `!roll 1d20`. Bot also supports slash commands such as `/help`.
+- Dice rolls:
+    \!roll : "Command for rolling dice. Each cast can be written as `xdy`, where `x` and `y` are numbers. For example, to roll a single classic 20-sided die you have to write `1d20`.\n\nYou can also add modifiers and even other dice to your roll. Just write the ariphmetic operation between the parts: `2d20 + 5` or `1d6 + 1d6`. You can also add your own commentary to the cast. For example, `!roll 2d20 + 5 Help me`."
+- Campaign:
+    What is this: Set of commands, designed to save information about your current campaign and characters in it.
+    /campaign start: Create new campaign. You may point all the nececcary characteristics for you characters in this campaign.
+    /campaign view: Check all campaigns on this server and which is currently active.
+    /campaign set: Set campaign as an active one.
+    /campaign delete: Delete the campaign.
+- Characaters:
+    What is this: Create your character! You can set all the basic information about them to be used in the current campaign.
+    /char create: Create your character in a form.
+    /char edit: Change basic stats of your character.
+    /char gain: gain some resources for your character.
+    /char lose: spend some resources of your character.
+    /char rest: Restore replensishable resources of your character.
+    /char delete: Delete your character.
+- Combat: 
+    Что это: Set of commands, designed to operate combat queue. IT DOES NOT USE YOUR `/CHAR` CHARACTERS! 
+    /init begin : Start the combat.
+    /init add : Add a participant to the combat.
+    /init remove : remove a participant from the combat.
+    /init next : Pass the turn.
+    /init move : Move the character up or down on set positions.
+    /init end : End the combat.
+- Twitter: 
+    Why?: This commands allow you to create your avatar to be able to write as your character or more!
+    /twit register: Register a character. You may set up the name and and a profile picture of your character (optional). Note that the link MUST end on `.png`, `.jpg`, `.webp` or another available image format. Using links to Discord images is a good practice.
+    /twit change_avatar: Change avatar profile picture.
+    /twit send : Send a message as your avatar.
+    /twit start_topic : Create forum post as your avatar.
+    /twit delete_twitter : Delete your avatar.
+- Miscellaneous: 
+    \!message <text>: Send message as The Prototcol.
+    \!techo <0-600> <message>: Write temporary message to be deleted in set amount of seconds.
+    \!protocol : Initiate The Protocol.

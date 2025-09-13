@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-11 21:11+0300\n"
+"POT-Creation-Date: 2025-09-13 18:15+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -223,12 +223,12 @@ msgstr "Уже есть персонаж с таким именем!"
 msgid "Character `{0}` is created! Don't forget to set up their charateristics"
 msgstr "Персонаж `{0}` создан! Не забудьте утановить их характеристики"
 
-#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:196
+#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:197
 #: src/Cogs/Models/campaign.py:42 src/Cogs/Models/campaign.py:108
 msgid "YES"
 msgstr "ДА"
 
-#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:196
+#: src/Cogs/Models/characters.py:52 src/Cogs/Models/twitter.py:197
 #: src/Cogs/Models/campaign.py:42 src/Cogs/Models/campaign.py:108
 msgid "NO"
 msgstr "НЕТ"
@@ -237,7 +237,7 @@ msgstr "НЕТ"
 msgid "## Character Deleted"
 msgstr "## Персонаж удален"
 
-#: src/Cogs/Models/characters.py:67 src/Cogs/Models/twitter.py:210
+#: src/Cogs/Models/characters.py:67 src/Cogs/Models/twitter.py:211
 #: src/Cogs/Models/campaign.py:123
 msgid "Cancelled"
 msgstr "Отменено"
@@ -271,11 +271,15 @@ msgstr "Вставьте ссылку на аватар персонажа"
 msgid "Link MUST end with file format: .jpeg, .png"
 msgstr "Ссылка ДОЛЖНА содержать формат файла: .jpeg, .png"
 
+#: src/Cogs/Models/twitter.py:32
+msgid "joined the network!"
+msgstr "теперь в сети!"
+
 #: src/Cogs/Models/twitter.py:52
 msgid "Write the message"
 msgstr "Напишите сообщение"
 
-#: src/Cogs/Models/twitter.py:57
+#: src/Cogs/Models/twitter.py:57 src/Cogs/Models/twitter.py:139
 msgid "Enter your message"
 msgstr "Введите сообщение"
 
@@ -283,7 +287,29 @@ msgstr "Введите сообщение"
 msgid "Message"
 msgstr "Сообщение"
 
-#: src/Cogs/Models/twitter.py:206
+#: src/Cogs/Models/twitter.py:126
+msgid "Start topic discussion!"
+msgstr "Начните обсуждение в ветке!"
+
+#: src/Cogs/Models/twitter.py:132
+msgid "Write topic title"
+msgstr "Укажите название поста"
+
+#: src/Cogs/Models/twitter.py:133 src/Cogs/Models/campaign.py:16
+msgid "Title"
+msgstr "Название"
+
+#: src/Cogs/Models/twitter.py:140
+#, fuzzy
+msgid "Message body"
+msgstr "Сообщение"
+
+#: src/Cogs/Models/twitter.py:187
+#, fuzzy
+msgid "Message sent!"
+msgstr "Сообщение"
+
+#: src/Cogs/Models/twitter.py:207
 msgid "Character deleted"
 msgstr "Персонаж удален"
 
@@ -294,10 +320,6 @@ msgstr "Начните новую кампанию!"
 #: src/Cogs/Models/campaign.py:15
 msgid "Write campaign name"
 msgstr "Напишите название кампании"
-
-#: src/Cogs/Models/campaign.py:16
-msgid "Title"
-msgstr "Название"
 
 #: src/Cogs/Models/campaign.py:24
 #, python-brace-format

@@ -29,7 +29,7 @@ class Form(discord.ui.Modal):
 
     async def on_submit(self, interaction: discord.Interaction):
         _ = self.bot.locale(interaction.locale)
-        embed = discord.Embed(title=f"**{self.login}** {_('joined the network!')}")
+        embed = discord.Embed(title="**{0}** {1}".format(self.login, _('joined the network!')))
         embed.set_author(name=interaction.user, icon_url=interaction.user.avatar.url)
         avatar = self.avatar if self.avatar.value != "" else Enums.default_image
         embed.set_thumbnail(url=avatar)
@@ -120,23 +120,24 @@ class Message(discord.ui.Modal):
 
 
 class TopicStarter(discord.ui.Modal):
-    def __init__(self, bot: Protocol, char, tag, image_url: str):
+    def __init__(self, bot: Protocol, locale: str, char: str, tag: str, image_url: str):
         self.bot = bot
-        super().__init__(title="Start topic discussion!")
+        _ = self.bot.locale(locale)
+        super().__init__(title=_("Start topic discussion!"))
         self.character = char
         self.tag = tag
         self.url = image_url
         self.topic_title = discord.ui.TextInput(
             style=discord.TextStyle.short,
-            label="Write topic title",
-            placeholder="Title",
+            label=_("Write topic title"),
+            placeholder=_("Title"),
             required=True,
             max_length=500,
         )
         self.topic_text = discord.ui.TextInput(
             style=discord.TextStyle.long,
-            label="Enter your message",
-            placeholder="Message body",
+            label=_("Enter your message"),
+            placeholder=_("Message body"),
             required=True,
             max_length=2000,
         )
@@ -183,7 +184,7 @@ class TopicStarter(discord.ui.Modal):
         await webhook.delete()
         _ = self.bot.locale(interaction.locale)
         await interaction.response.send_message(
-            f"{_('Message sent!')} ✅", ephemeral=True
+            "{0} ✅".format(_('Message sent!')), ephemeral=True
         )
 
 

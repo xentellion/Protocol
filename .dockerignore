@@ -1,0 +1,7 @@
+__pycache__/
+venv/
+*.mo
+*.pot
+LICENSE
+README.md
+POTFILES
